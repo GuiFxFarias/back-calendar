@@ -1,0 +1,25 @@
+Pesquisador - Não existe centro de custo atrelado a ele (exigente - simples) - Preciso verificar com eles 1, X
+
+Importação Fapesp - não gera nenhuma ordem de compra e segue o fluxo padrão de projetos. (exigente) - 1 XXXXXXX - XXXXXX
+
+Relatório de saldo - precisa-se de um relatório de falta para mostrar no WebHemocentro (Adicionar colunas no baixo mínimo para auxiliar no trabalho, quantidade de itens nas requisições em aberto, filtrar a solicitação para identificar a quantidade itens por cada, quantidade de OC) - 8,1 XXXXXXXXXXXXX
+	
+Criar um fluxo similar a da única para realizar as compras de esquote (exigente - avaliar) - 8 XXXXXXXX
+
+Ajustes - precisa de uma remodelação na forma q é tratada a solicitação de ajuste, alteração inclusão e exclusão diretamente na sua programação de material - 8
+
+Material extra - somente pode pedir o material que esta programado no seu centro de custo (exigente - simples) - 1 XXXXXX 4537 XXX
+
+----------------------------------------------------------------------------------------------
+
+Com a adição de um botão de reposição de estoque, selecionando os itens que estão em falta para realizar a SC. (melhoria)
+
+Adicionar parâmetro na ordem de compra, se for maior também precisa mudar o saldo e o valor comprometido (exigente - precisa alterar o script de valores que estão trazendo da WK) - 3
+
+Adicionar uma flag de equipamento na rubrica e quais os equipamentos que serão pedidos, com seus valores (melhoria)
+
+Rastreabilidade da solicitação após o registro de entrada, usar o separador e conferente para marcar os checks de status (melhoria)
+
+Adição de um orçamento do HC (melhoria)
+
+Solicitação de item não cadastrado no material permanente (melhorie)
