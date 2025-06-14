@@ -135,7 +135,7 @@ class VisitaController {
       if (arquivos && arquivos.length > 0) {
         for (let i = 0; i < arquivos.length; i++) {
           const file = arquivos[i];
-          const arquivo_url = path.join('/uploads', file.filename);
+          const arquivo_url = `${process.env.BASE_URL}/uploads/${file.filename}`;
           const tipo = file.mimetype;
 
           await anexoModel.criarAnexo({
