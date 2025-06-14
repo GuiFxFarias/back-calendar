@@ -38,4 +38,7 @@ router.delete('/cliente/:id', clienteController.deletar);
 // Rota para buscar anexos por visita_id
 router.get('/anexos/:visita_id', anexoController.listarPorVisita);
 
+// Baixar arquivo
+router.get('/baixar/:nome', anexoController.baixar);
+
 module.exports = router;

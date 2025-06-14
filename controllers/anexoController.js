@@ -1,5 +1,5 @@
 const AnexoModel = require('../models/anexoModel');
-
+const path = require('path');
 class AnexoController {
   async criar(req, res) {
     try {
@@ -41,6 +41,19 @@ class AnexoController {
       console.error('Erro ao deletar anexo:', error);
       res.status(500).json({ erro: 'Erro interno ao deletar anexo.' });
     }
+  }
+
+  async baixar(req, res) {
+    const nomeArquivo = req.params.nome;
+
+    const filePath = path.join(process.cwd(), 'uploads', nomeArquivo);
+
+    res.download(filePath, nomeArquivo, (err) => {
+      if (err) {
+        console.error('Erro ao baixar:', err);
+        res.status(500).json({ erro: 'Erro ao fazer download do arquivo.' });
+      }
+    });
   }
 }
 
