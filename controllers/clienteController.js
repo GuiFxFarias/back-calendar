@@ -45,6 +45,28 @@ class ClienteController {
     }
   }
 
+  async criarSemCadastro(req, res) {
+    try {
+      const { nome } = req.body;
+
+      if (!nome) {
+        return res
+          .status(400)
+          .json({ erro: 'Todos os campos são obrigatórios.' });
+      }
+
+      const result = await ClienteModel.criarClienteSemCadastro({ nome });
+
+      res.status(201).json({
+        mensagem: 'Cliente criado com sucesso!',
+        id: result.insertId,
+      });
+    } catch (error) {
+      console.error('Erro ao criar cliente:', error);
+      res.status(500).json({ erro: 'Erro interno ao criar cliente.' });
+    }
+  }
+
   async deletar(req, res) {
     try {
       const { id } = req.params;

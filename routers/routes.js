@@ -32,6 +32,9 @@ router.get('/cliente/:id', clienteController.buscarPorId);
 // Criar novo cliente
 router.post('/criarCliente', clienteController.criar);
 
+// Criar novo cliente sem cadastro
+router.post('/clienteSemCadastro', clienteController.criarSemCadastro);
+
 // Deletar cliente
 router.delete('/cliente/:id', clienteController.deletar);
 

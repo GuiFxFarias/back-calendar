@@ -32,6 +32,11 @@ class ClienteModel {
     return this.executaQuery(sql, [nome, telefone, endereco]);
   }
 
+  criarClienteSemCadastro({ nome }) {
+    const sql = 'INSERT INTO clientes (nome) VALUES (?)';
+    return this.executaQuery(sql, [nome]);
+  }
+
   // Deletar cliente
   deletar(id) {
     const sql = 'DELETE FROM clientes WHERE id = ?';
