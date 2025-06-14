@@ -55,20 +55,21 @@ class VisitaController {
           const arquivo_url = `${process.env.BASE_URL}/uploads/${file.filename}`;
           const tipo = file.mimetype;
 
-          await AnexoModel.criarAnexo({
+          const anexo = await AnexoModel.criarAnexo({
             visita_id,
             arquivo_url,
             tipo,
           });
 
           if (i === 0) {
-            idAnexo = visita_id; // ou ID do anexo, se capturando
+            idAnexo = anexo.insertId;
           }
         }
 
         await visitaModel.editarVisita(visita_id, {
           preco,
           status,
+          idAnexo,
         });
       }
 
