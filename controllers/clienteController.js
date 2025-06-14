@@ -47,15 +47,18 @@ class ClienteController {
 
   async criarSemCadastro(req, res) {
     try {
-      const { nome } = req.body;
+      const { nome, telefone } = req.body;
 
-      if (!nome) {
+      if (!nome && !telefone) {
         return res
           .status(400)
           .json({ erro: 'Todos os campos são obrigatórios.' });
       }
 
-      const result = await ClienteModel.criarClienteSemCadastro({ nome });
+      const result = await ClienteModel.criarClienteSemCadastro({
+        nome,
+        telefone,
+      });
 
       res.status(201).json({
         mensagem: 'Cliente criado com sucesso!',
