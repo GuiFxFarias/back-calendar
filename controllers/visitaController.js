@@ -43,7 +43,6 @@ class VisitaController {
         preco,
         descricao,
         status,
-        idAnexo: null,
       });
 
       const visita_id = resultado.insertId;
@@ -53,7 +52,7 @@ class VisitaController {
       if (arquivos && arquivos.length > 0) {
         for (let i = 0; i < arquivos.length; i++) {
           const file = arquivos[i];
-          const arquivo_url = path.join('/uploads', file.filename);
+          const arquivo_url = `${process.env.BASE_URL}/uploads/${file.filename}`;
           const tipo = file.mimetype;
 
           await AnexoModel.criarAnexo({
@@ -67,11 +66,9 @@ class VisitaController {
           }
         }
 
-        // 3. Atualiza a visita com o idAnexo
         await visitaModel.editarVisita(visita_id, {
           preco,
           status,
-          idAnexo,
         });
       }
 

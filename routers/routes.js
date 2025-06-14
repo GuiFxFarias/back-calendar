@@ -1,8 +1,13 @@
 const { Router } = require('express');
+const path = require('path');
+const express = require('express');
 const visitaController = require('../controllers/visitaController');
 const clienteController = require('../controllers/clienteController');
 const upload = require('../middlewares/upload');
+const anexoController = require('../controllers/anexoController');
 const router = Router();
+
+const app = express();
 
 // Buscar visitas entre datas: /visitas?inicio=2025-06-10&fim=2025-06-16
 router.get('/buscarVisita', visitaController.listarPorData);
@@ -33,5 +38,10 @@ router.post('/criarCliente', clienteController.criar);
 
 // Deletar cliente
 router.delete('/cliente/:id', clienteController.deletar);
+
+// Buscar anexo por visita
+router.get('/anexos/:visita_id', anexoController.listarPorVisita);
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 module.exports = router;
