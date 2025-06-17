@@ -3,6 +3,7 @@ const visitaController = require('../controllers/visitaController');
 const clienteController = require('../controllers/clienteController');
 const upload = require('../middlewares/upload');
 const anexoController = require('../controllers/anexoController');
+const userController = require('../controllers/userController');
 const router = Router();
 
 // Buscar visitas entre datas: /visitas?inicio=2025-06-10&fim=2025-06-16
@@ -43,5 +44,8 @@ router.get('/anexos/:visita_id', anexoController.listarPorVisita);
 
 // Baixar arquivo
 router.get('/baixar/:nome', anexoController.baixar);
+
+// Login de usuario
+router.post('/login', userController.buscarUsers);
 
 module.exports = router;
