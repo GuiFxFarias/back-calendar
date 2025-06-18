@@ -20,8 +20,8 @@ class UserController {
         });
       }
 
-      const hash = await bcrypt.hash(senha, 10);
-      console.log(hash);
+      // const hash = await bcrypt.hash(senha, 10);
+      // console.log(hash);
 
       const usuario = resposta[0];
       const senhaValida = await bcrypt.compare(String(senha), usuario.senha);

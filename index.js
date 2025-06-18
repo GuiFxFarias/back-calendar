@@ -1,9 +1,13 @@
+// outras imports acima
+require('dotenv').config();
+const router = require('./routers/indexRotas.js');
+const cors = require('cors');
+const { enviarMensagemWhatsApp } = require('./services/twilioService.js');
+
+// require('./services/agendadorMensagens.js');
+
 const express = require('express');
 const app = express();
-require('dotenv').config(); // <-- Aqui!
-
-const router = require('./routers/index.js');
-const cors = require('cors');
 
 app.use(
   cors({
@@ -16,12 +20,11 @@ app.use(
 router(app, express);
 
 const PORT = 3001;
-
 app.listen(PORT, (error) => {
   if (error) {
     console.log('Error running server');
     return;
   }
 
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`✅ Server is running on port ${PORT}`);
 });
