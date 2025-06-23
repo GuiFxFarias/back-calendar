@@ -55,7 +55,7 @@ class VisitaController {
           const arquivo_url = `${process.env.BASE_URL}/uploads/${file.filename}`;
           const tipo = file.mimetype;
 
-          const anexo = await AnexoModel.criarAnexo({
+          const anexo = await anexoModel.criarAnexo({
             visita_id,
             arquivo_url,
             tipo,

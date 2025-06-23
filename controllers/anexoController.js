@@ -1,4 +1,4 @@
-const AnexoModel = require('../models/anexoModel');
+const anexoModel = require('../models/anexoModel');
 const path = require('path');
 class AnexoController {
   async criar(req, res) {
@@ -9,7 +9,7 @@ class AnexoController {
         return res.status(400).json({ erro: 'Campos obrigatórios ausentes.' });
       }
 
-      await AnexoModel.criarAnexo({
+      await anexoModel.criarAnexo({
         visita_id,
         arquivo_url,
         tipo: tipo || 'outro',
@@ -24,7 +24,7 @@ class AnexoController {
   async listarPorVisita(req, res) {
     try {
       const { visita_id } = req.params;
-      const anexos = await AnexoModel.buscarPorVisita(visita_id);
+      const anexos = await anexoModel.buscarPorVisita(visita_id);
       res.status(200).json(anexos);
     } catch (error) {
       console.error('Erro ao buscar anexos:', error);
@@ -35,7 +35,7 @@ class AnexoController {
   async deletar(req, res) {
     try {
       const { id } = req.params;
-      await AnexoModel.deletar(id);
+      await anexoModel.deletar(id);
       res.status(200).json({ mensagem: 'Anexo deletado com sucesso.' });
     } catch (error) {
       console.error('Erro ao deletar anexo:', error);
