@@ -41,6 +41,9 @@ router.post('/clienteSemCadastro', clienteController.criarSemCadastro);
 // Deletar cliente
 router.delete('/cliente/:id', clienteController.deletar);
 
+// Editar cliente por id
+router.put('/cliente/:id', clienteController.atualizarCliente);
+
 // Rota para buscar anexos por visita_id
 router.get('/anexos/:visita_id', anexoController.listarPorVisita);
 

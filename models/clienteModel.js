@@ -37,6 +37,15 @@ class ClienteModel {
     return this.executaQuery(sql, [nome, telefone]);
   }
 
+  atualizarCliente({ id, nome, telefone, endereco }) {
+    const sql = `
+    UPDATE clientes 
+    SET nome = ?, telefone = ?, endereco = ? 
+    WHERE id = ?
+  `;
+    return this.executaQuery(sql, [nome, telefone, endereco, id]);
+  }
+
   // Deletar cliente
   deletar(id) {
     const sql = 'DELETE FROM clientes WHERE id = ?';

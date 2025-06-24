@@ -77,7 +77,46 @@ class ClienteController {
       res.status(200).json({ mensagem: 'Cliente deletado com sucesso.' });
     } catch (error) {
       console.error('Erro ao deletar cliente:', error);
-      res.status(500).json({ erro: 'Erro interno ao deletar cliente.' });
+
+      const mensagemErro =
+        error?.code === 'ER_ROW_IS_REFERENCED_2'
+          ? 'Não é possível deletar: existe uma visita vinculada a este cliente.'
+          : error?.sqlMessage || 'Erro interno ao deletar cliente.';
+
+      res.status(500).json({
+        erro: mensagemErro,
+      });
+    }
+  }
+
+  async atualizarCliente(req, res) {
+    try {
+      const { id } = req.params;
+      const { nome, telefone, endereco } = req.body;
+
+      if (!nome || !telefone) {
+        return res
+          .status(400)
+          .json({ erro: 'Nome e telefone são obrigatórios.' });
+      }
+
+      const resultado = await ClienteModel.atualizarCliente({
+        id,
+        nome,
+        telefone,
+        endereco,
+      });
+
+      if (resultado.affectedRows === 0) {
+        return res
+          .status(404)
+          .json({ erro: 'Cliente não encontrado para atualização.' });
+      }
+
+      res.status(200).json({ mensagem: 'Cliente atualizado com sucesso.' });
+    } catch (error) {
+      console.error('Erro ao atualizar cliente:', error);
+      res.status(500).json({ erro: 'Erro interno ao atualizar cliente.' });
     }
   }
 }
