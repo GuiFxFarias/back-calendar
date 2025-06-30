@@ -74,19 +74,4 @@ router.delete(
   mensagensProgramadasController.deletar
 );
 
-router.post('/webhook', (req, res) => {
-  const from = req.body.From;
-  const body = req.body.Body;
-
-  console.log(`📩 Mensagem recebida de ${from}: ${body}`);
-
-  // (opcional) Responder diretamente:
-  res.set('Content-Type', 'text/xml');
-  res.send(`
-    <Response>
-      <Message>Recebido! Em breve retornamos.</Message>
-    </Response>
-  `);
-});
-
 module.exports = router;

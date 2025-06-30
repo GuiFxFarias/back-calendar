@@ -1,11 +1,11 @@
-// outras imports acima
 require('dotenv').config();
 const router = require('./routers/indexRotas.js');
 const cors = require('cors');
 
-require('./services/agendadorMensagens.js');
+// require('./services/agendadorMensagens.js');
 
 const express = require('express');
+const { enviarMensagemWhatsApp } = require('./services/twilioService.js');
 const app = express();
 
 app.use(
@@ -24,6 +24,8 @@ app.listen(PORT, (error) => {
     console.log('Error running server');
     return;
   }
+
+  // enviarMensagemWhatsApp('+5516988447335', 'Farias');
 
   console.log(`✅ Server is running on port ${PORT}`);
 });
