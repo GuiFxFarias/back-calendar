@@ -5,6 +5,10 @@ const anexoController = require('../controllers/anexoController');
 const userController = require('../controllers/userController');
 const mensagensVisitaController = require('../controllers/mensagensVisitaController');
 const mensagensProgramadasController = require('../controllers/mensagemProgramadaController');
+const {
+  authRedirect,
+  oauthCallback,
+} = require('../controllers/oauthController');
 const upload = require('../middlewares/upload');
 const router = Router();
 
@@ -73,5 +77,8 @@ router.delete(
   '/mensagens-programadas/:id',
   mensagensProgramadasController.deletar
 );
+
+router.get('/auth', authRedirect); // redireciona para o Google
+router.get('/oauth2callback', oauthCallback); // callback com tokens
 
 module.exports = router;

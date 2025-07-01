@@ -1,5 +1,6 @@
 const anexoModel = require('../models/anexoModel.js');
 const visitaModel = require('../models/visitaModel.js');
+const criarEventoNoCalendar = require('../services/googleCalendarService.js');
 const path = require('path');
 
 class VisitaController {
@@ -36,7 +37,7 @@ class VisitaController {
         return res.status(400).json({ erro: 'Campos obrigatórios ausentes.' });
       }
 
-      // 1. Cria a visita com idAnexo = null por padrão
+      // 1. Cria a visita
       const resultado = await visitaModel.criarVisita({
         cliente_id,
         data_visita,
@@ -48,7 +49,7 @@ class VisitaController {
       const visita_id = resultado.insertId;
       let idAnexo = null;
 
-      // 2. Salva os anexos e define o primeiro como destaque (idAnexo)
+      // 2. Salva os anexos
       if (arquivos && arquivos.length > 0) {
         for (let i = 0; i < arquivos.length; i++) {
           const file = arquivos[i];
@@ -66,10 +67,17 @@ class VisitaController {
           }
         }
 
-        await visitaModel.editarVisita(visita_id, {
-          preco,
-          status,
-          idAnexo,
+        await visitaModel.editarVisita(visita_id, { preco, status, idAnexo });
+      }
+
+      // 3. Busca nome e email do cliente
+      const cliente = await clienteModel.buscarPorId(cliente_id);
+      if (cliente?.email) {
+        // 4. Cria evento no Google Calendar
+        await criarEventoNoCalendar({
+          nomeCliente: cliente.nome,
+          emailCliente: cliente.email,
+          data_visita,
         });
       }
 
@@ -77,7 +85,7 @@ class VisitaController {
         .status(201)
         .json({ mensagem: 'Visita criada com sucesso!', visita_id });
     } catch (error) {
-      console.error('Erro ao criar visita com anexos:', error);
+      console.error('Erro ao criar visita:', error);
       res.status(500).json({ erro: 'Erro interno ao criar visita.' });
     }
   }
