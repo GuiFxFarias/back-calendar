@@ -39,15 +39,13 @@ class VisitaController {
       }
 
       // 1. Cria a visita
-      // const resultado = await visitaModel.criarVisita({
-      //   cliente_id,
-      //   data_visita,
-      //   preco,
-      //   descricao,
-      //   status,
-      // });
-
-      const resultado = 'teste';
+      const resultado = await visitaModel.criarVisita({
+        cliente_id,
+        data_visita,
+        preco,
+        descricao,
+        status,
+      });
 
       const visita_id = resultado.insertId;
       let idAnexo = null;
