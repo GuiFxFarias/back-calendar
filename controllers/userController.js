@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 class UserController {
   async buscarUsers(req, res) {
     const { email, senha } = req.body;
+
     try {
       if (!email || !senha) {
         return res.status(400).json({
@@ -12,7 +13,9 @@ class UserController {
           erro: 'E-mail e senha são obrigatórios',
         });
       }
+
       const resposta = await userModel.buscarUsers(email);
+
       if (!resposta || resposta.length === 0) {
         return res.status(404).json({
           sucesso: false,
@@ -20,10 +23,8 @@ class UserController {
         });
       }
 
-      // const hash = await bcrypt.hash(senha, 10);
-      // console.log(hash);
-
       const usuario = resposta[0];
+
       const senhaValida = await bcrypt.compare(String(senha), usuario.senha);
       if (!senhaValida) {
         return res.status(401).json({
@@ -32,9 +33,13 @@ class UserController {
         });
       }
 
-      // Gerar token JWT
+      // ✅ Gerar token JWT com tenant_id incluso
       const token = jwt.sign(
-        { id: usuario.ID, email: usuario.email },
+        {
+          id: usuario.id,
+          email: usuario.email,
+          tenant_id: usuario.tenant_id, // <- aqui incluímos o tenant
+        },
         process.env.JWT_SECRET,
         { expiresIn: '1h' }
       );
@@ -44,6 +49,7 @@ class UserController {
         usuario,
         value: {
           token,
+          tenant_id: usuario.tenant_id, // <- também no retorno explícito
           expiration: new Date(Date.now() + 1000 * 60 * 60 * 1),
         },
       });

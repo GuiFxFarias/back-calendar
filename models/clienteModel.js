@@ -13,43 +13,40 @@ class ClienteModel {
     });
   }
 
-  // Buscar todos os clientes
-  buscarTodos() {
-    const sql = 'SELECT * FROM clientes ORDER BY nome ASC';
-    return this.executaQuery(sql);
+  buscarTodos(tenant_id) {
+    const sql = 'SELECT * FROM clientes WHERE tenant_id = ? ORDER BY nome ASC';
+    return this.executaQuery(sql, [tenant_id]);
   }
 
-  // Buscar por ID
-  buscarPorId(id) {
-    const sql = 'SELECT * FROM clientes WHERE id = ?';
-    return this.executaQuery(sql, [id]);
+  buscarPorId(id, tenant_id) {
+    const sql = 'SELECT * FROM clientes WHERE tenant_id = ? AND id = ?';
+    return this.executaQuery(sql, [tenant_id, id]);
   }
 
-  // Criar novo cliente
-  criarCliente({ nome, telefone, endereco }) {
+  criarCliente({ nome, telefone, endereco, tenant_id }) {
     const sql =
-      'INSERT INTO clientes (nome, telefone, endereco) VALUES (?, ?, ?)';
-    return this.executaQuery(sql, [nome, telefone, endereco]);
+      'INSERT INTO clientes (nome, telefone, endereco, tenant_id) VALUES (?, ?, ?, ?)';
+    return this.executaQuery(sql, [nome, telefone, endereco, tenant_id]);
   }
 
-  criarClienteSemCadastro({ nome, telefone }) {
-    const sql = 'INSERT INTO clientes (nome, telefone) VALUES (?, ?)';
-    return this.executaQuery(sql, [nome, telefone]);
+  criarClienteSemCadastro({ nome, telefone, tenant_id }) {
+    const sql =
+      'INSERT INTO clientes (nome, telefone, tenant_id) VALUES (?, ?, ?)';
+    return this.executaQuery(sql, [nome, telefone, tenant_id]);
   }
 
-  atualizarCliente({ id, nome, telefone, endereco }) {
+  atualizarCliente({ id, nome, telefone, endereco, tenant_id }) {
     const sql = `
-    UPDATE clientes 
-    SET nome = ?, telefone = ?, endereco = ? 
-    WHERE id = ?
-  `;
-    return this.executaQuery(sql, [nome, telefone, endereco, id]);
+      UPDATE clientes 
+      SET nome = ?, telefone = ?, endereco = ? 
+      WHERE tenant_id = ? AND id = ?
+    `;
+    return this.executaQuery(sql, [nome, telefone, endereco, tenant_id, id]);
   }
 
-  // Deletar cliente
-  deletar(id) {
-    const sql = 'DELETE FROM clientes WHERE id = ?';
-    return this.executaQuery(sql, [id]);
+  deletar(id, tenant_id) {
+    const sql = 'DELETE FROM clientes WHERE tenant_id = ? AND id = ?';
+    return this.executaQuery(sql, [tenant_id, id]);
   }
 }
 

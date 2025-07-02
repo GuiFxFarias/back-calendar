@@ -13,26 +13,22 @@ class VisitaModel {
     });
   }
 
-  buscarPorData(dataInicio, dataFim) {
+  buscarPorData(dataInicio, dataFim, tenant_id) {
     const sql = `
       SELECT * FROM visitas
-      WHERE data_visita BETWEEN ? AND ?
+      WHERE tenant_id = ? AND data_visita BETWEEN ? AND ?
       ORDER BY data_visita ASC
     `;
-    return this.executaQuery(sql, [dataInicio, dataFim]);
+    return this.executaQuery(sql, [tenant_id, dataInicio, dataFim]);
   }
 
-  criarVisita({
-    cliente_id,
-    data_visita,
-    preco,
-    descricao,
-    status,
-    idAnexo = null,
-  }) {
+  criarVisita(
+    { cliente_id, data_visita, preco, descricao, status, idAnexo = null },
+    tenant_id
+  ) {
     const sql = `
-      INSERT INTO visitas (cliente_id, data_visita, preco, descricao, status, idAnexo, criado_em)
-      VALUES (?, ?, ?, ?, ?, ?, NOW())
+      INSERT INTO visitas (cliente_id, data_visita, preco, descricao, status, idAnexo, tenant_id, criado_em)
+      VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
     `;
     return this.executaQuery(sql, [
       cliente_id,
@@ -41,31 +37,33 @@ class VisitaModel {
       descricao,
       status,
       idAnexo,
+      tenant_id,
     ]);
   }
 
-  buscarTodas() {
-    const sql = 'SELECT * FROM visitas ORDER BY data_visita DESC';
-    return this.executaQuery(sql);
+  buscarTodas(tenant_id) {
+    const sql =
+      'SELECT * FROM visitas WHERE tenant_id = ? ORDER BY data_visita DESC';
+    return this.executaQuery(sql, [tenant_id]);
   }
 
-  buscarPorId(id) {
-    const sql = 'SELECT * FROM visitas WHERE id = ?';
-    return this.executaQuery(sql, [id]);
+  buscarPorId(id, tenant_id) {
+    const sql = 'SELECT * FROM visitas WHERE tenant_id = ? AND id = ?';
+    return this.executaQuery(sql, [tenant_id, id]);
   }
 
-  deletar(id) {
-    const sql = 'DELETE FROM visitas WHERE id = ?';
-    return this.executaQuery(sql, [id]);
+  deletar(id, tenant_id) {
+    const sql = 'DELETE FROM visitas WHERE tenant_id = ? AND id = ?';
+    return this.executaQuery(sql, [tenant_id, id]);
   }
 
-  editarVisita(id, { preco, status, idAnexo = null }) {
+  editarVisita(id, { preco, status, idAnexo = null }, tenant_id) {
     const sql = `
-    UPDATE visitas
-    SET preco = ?, status = ?, idAnexo = ?
-    WHERE id = ?
-  `;
-    return this.executaQuery(sql, [preco, status, idAnexo, id]);
+      UPDATE visitas
+      SET preco = ?, status = ?, idAnexo = ?
+      WHERE tenant_id = ? AND id = ?
+    `;
+    return this.executaQuery(sql, [preco, status, idAnexo, tenant_id, id]);
   }
 }
 

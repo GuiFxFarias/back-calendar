@@ -39,6 +39,7 @@ class MensagemProgramadaController {
         dias_intervalo,
         proxima_data_envio,
         ativo,
+        tenant_id: req.tenantId, // ✅ tenant incluído
       });
 
       res
@@ -54,7 +55,7 @@ class MensagemProgramadaController {
 
   async listar(req, res) {
     try {
-      const mensagens = await mensagemProgramadaModel.buscarTodas();
+      const mensagens = await mensagemProgramadaModel.buscarTodas(req.tenantId); // ✅ busca segura
       res.status(200).json(mensagens);
     } catch (error) {
       console.error('Erro ao listar mensagens:', error);
@@ -65,7 +66,7 @@ class MensagemProgramadaController {
   async deletar(req, res) {
     try {
       const { id } = req.params;
-      await mensagemProgramadaModel.deletar(id);
+      await mensagemProgramadaModel.deletar(id, req.tenantId); // ✅ deleção segura
       res.status(200).json({ mensagem: 'Mensagem deletada com sucesso!' });
     } catch (error) {
       console.error('Erro ao deletar mensagem:', error);

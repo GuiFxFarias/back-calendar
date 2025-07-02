@@ -20,12 +20,13 @@ class MensagemProgramadaModel {
     dias_intervalo,
     proxima_data_envio,
     ativo,
+    tenant_id,
   }) {
     const sql = `
-    INSERT INTO mensagens_programadas
-    (cliente_id, telefone, texto, dias_intervalo, proxima_data_envio, ativo)
-    VALUES (?, ?, ?, ?, ?, ?)
-  `;
+      INSERT INTO mensagens_programadas
+      (cliente_id, telefone, texto, dias_intervalo, proxima_data_envio, ativo, tenant_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `;
     return this.executaQuery(sql, [
       cliente_id,
       telefone,
@@ -33,23 +34,33 @@ class MensagemProgramadaModel {
       dias_intervalo,
       proxima_data_envio,
       ativo,
+      tenant_id,
     ]);
   }
 
-  buscarTodas() {
-    const sql =
-      'SELECT * FROM mensagens_programadas ORDER BY proxima_data_envio ASC';
-    return this.executaQuery(sql);
+  buscarTodas(tenant_id) {
+    const sql = `
+      SELECT * FROM mensagens_programadas
+      WHERE tenant_id = ?
+      ORDER BY proxima_data_envio ASC
+    `;
+    return this.executaQuery(sql, [tenant_id]);
   }
 
-  buscarPorCliente(cliente_id) {
-    const sql = 'SELECT * FROM mensagens_programadas WHERE cliente_id = ?';
-    return this.executaQuery(sql, [cliente_id]);
+  buscarPorCliente(cliente_id, tenant_id) {
+    const sql = `
+      SELECT * FROM mensagens_programadas
+      WHERE tenant_id = ? AND cliente_id = ?
+    `;
+    return this.executaQuery(sql, [tenant_id, cliente_id]);
   }
 
-  deletar(id) {
-    const sql = 'DELETE FROM mensagens_programadas WHERE id = ?';
-    return this.executaQuery(sql, [id]);
+  deletar(id, tenant_id) {
+    const sql = `
+      DELETE FROM mensagens_programadas
+      WHERE tenant_id = ? AND id = ?
+    `;
+    return this.executaQuery(sql, [tenant_id, id]);
   }
 }
 

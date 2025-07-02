@@ -15,18 +15,24 @@ class UserModel {
 
   buscarUsers(email) {
     const sql = 'SELECT * FROM usuarios WHERE email = ?';
-    return this.executaQuery(sql, email);
+    return this.executaQuery(sql, [email]);
   }
 
-  // atualizar(atendimentoAtualizar, id) {
-  //   const sql = "UPDATE atendimentos SET ? WHERE id = ?";
-  //   return this.executaQuery(sql, [atendimentoAtualizar, id]);
-  // }
+  buscarPorEmailETenant(email, tenant_id) {
+    const sql = 'SELECT * FROM usuarios WHERE email = ? AND tenant_id = ?';
+    return this.executaQuery(sql, [email, tenant_id]);
+  }
 
-  // deletar(id) {
-  //   const sql = "DELETE FROM atendimentos WHERE id = ?";
-  //   return this.executaQuery(sql, id);
-  // }
+  buscarPorTenant(tenant_id) {
+    const sql = 'SELECT * FROM usuarios WHERE tenant_id = ?';
+    return this.executaQuery(sql, [tenant_id]);
+  }
+
+  criarUsuario({ nome, email, senha, tenant_id }) {
+    const sql =
+      'INSERT INTO usuarios (nome, email, senha, tenant_id) VALUES (?, ?, ?, ?)';
+    return this.executaQuery(sql, [nome, email, senha, tenant_id]);
+  }
 }
 
 module.exports = new UserModel();

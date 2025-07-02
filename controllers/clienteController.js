@@ -3,7 +3,7 @@ const ClienteModel = require('../models/clienteModel');
 class ClienteController {
   async listarTodos(req, res) {
     try {
-      const clientes = await ClienteModel.buscarTodos();
+      const clientes = await ClienteModel.buscarTodos(req.tenantId);
       res.status(200).json(clientes);
     } catch (error) {
       console.error('Erro ao listar clientes:', error);
@@ -14,7 +14,7 @@ class ClienteController {
   async buscarPorId(req, res) {
     try {
       const { id } = req.params;
-      const resultado = await ClienteModel.buscarPorId(id);
+      const resultado = await ClienteModel.buscarPorId(id, req.tenantId);
 
       if (resultado.length === 0) {
         return res.status(404).json({ erro: 'Cliente não encontrado.' });
@@ -37,7 +37,13 @@ class ClienteController {
           .json({ erro: 'Todos os campos são obrigatórios.' });
       }
 
-      await ClienteModel.criarCliente({ nome, telefone, endereco });
+      await ClienteModel.criarCliente({
+        nome,
+        telefone,
+        endereco,
+        tenant_id: req.tenantId,
+      });
+
       res.status(201).json({ mensagem: 'Cliente criado com sucesso!' });
     } catch (error) {
       console.error('Erro ao criar cliente:', error);
@@ -49,7 +55,7 @@ class ClienteController {
     try {
       const { nome, telefone } = req.body;
 
-      if (!nome && !telefone) {
+      if (!nome || !telefone) {
         return res
           .status(400)
           .json({ erro: 'Todos os campos são obrigatórios.' });
@@ -58,6 +64,7 @@ class ClienteController {
       const result = await ClienteModel.criarClienteSemCadastro({
         nome,
         telefone,
+        tenant_id: req.tenantId,
       });
 
       res.status(201).json({
@@ -73,7 +80,8 @@ class ClienteController {
   async deletar(req, res) {
     try {
       const { id } = req.params;
-      await ClienteModel.deletar(id);
+      await ClienteModel.deletar(id, req.tenantId);
+
       res.status(200).json({ mensagem: 'Cliente deletado com sucesso.' });
     } catch (error) {
       console.error('Erro ao deletar cliente:', error);
@@ -83,9 +91,7 @@ class ClienteController {
           ? 'Não é possível deletar: existe uma visita vinculada a este cliente.'
           : error?.sqlMessage || 'Erro interno ao deletar cliente.';
 
-      res.status(500).json({
-        erro: mensagemErro,
-      });
+      res.status(500).json({ erro: mensagemErro });
     }
   }
 
@@ -105,6 +111,7 @@ class ClienteController {
         nome,
         telefone,
         endereco,
+        tenant_id: req.tenantId,
       });
 
       if (resultado.affectedRows === 0) {

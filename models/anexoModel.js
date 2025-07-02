@@ -13,23 +13,23 @@ class AnexoModel {
     });
   }
 
-  criarAnexo({ visita_id, arquivo_url, tipo }) {
+  criarAnexo({ visita_id, arquivo_url, tipo, tenant_id }) {
     const sql = `
-      INSERT INTO anexos (visita_id, arquivo_url, tipo)
+      INSERT INTO anexos (visita_id, arquivo_url, tipo, tenant_id)
       VALUES (?, ?, ?)
     `;
-    return this.executaQuery(sql, [visita_id, arquivo_url, tipo]);
+    return this.executaQuery(sql, [visita_id, arquivo_url, tipo, tenant_id]);
   }
 
-  buscarPorVisita(visita_id) {
+  buscarPorVisita(visita_id, tenant_id) {
     const sql =
-      'SELECT * FROM anexos WHERE visita_id = ? ORDER BY criado_em ASC';
-    return this.executaQuery(sql, [visita_id]);
+      'SELECT * FROM anexos WHERE tenant_id = ? AND visita_id = ? ORDER BY criado_em ASC';
+    return this.executaQuery(sql, [visita_id, tenant_id]);
   }
 
-  deletar(id) {
-    const sql = 'DELETE FROM anexos WHERE id = ?';
-    return this.executaQuery(sql, [id]);
+  deletar(id, tenant_id) {
+    const sql = 'DELETE FROM anexos WHERE tenant_id = ? AND id = ?';
+    return this.executaQuery(sql, [id, tenant_id]);
   }
 }
 

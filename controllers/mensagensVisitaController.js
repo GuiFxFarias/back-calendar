@@ -29,6 +29,7 @@ class MensagensVisitaController {
         tipo_mensagem,
         conteudo,
         data_agendada,
+        tenant_id: req.tenantId, // ✅ tenant incluído
       });
 
       res.status(201).json({ mensagem: 'Mensagem agendada com sucesso!' });
@@ -42,7 +43,10 @@ class MensagensVisitaController {
     try {
       const { visita_id } = req.params;
 
-      const mensagens = await mensagensVisitaModel.buscarPorVisita(visita_id);
+      const mensagens = await mensagensVisitaModel.buscarPorVisita(
+        visita_id,
+        req.tenantId // ✅ busca segura por tenant
+      );
 
       res.status(200).json(mensagens);
     } catch (error) {
