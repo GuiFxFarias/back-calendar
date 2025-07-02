@@ -78,7 +78,4 @@ router.delete(
   mensagensProgramadasController.deletar
 );
 
-router.get('/auth', authRedirect); // redireciona para o Google
-router.get('/oauth2callback', oauthCallback); // callback com tokens
-
 module.exports = router;

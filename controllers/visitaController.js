@@ -1,6 +1,7 @@
 const anexoModel = require('../models/anexoModel.js');
 const visitaModel = require('../models/visitaModel.js');
-const criarEventoNoCalendar = require('../services/googleCalendarService.js');
+const clienteModel = require('../models/clienteModel.js');
+const agendarNoGoogle = require('../services/googleCalendarService.js');
 const path = require('path');
 
 class VisitaController {
@@ -38,13 +39,15 @@ class VisitaController {
       }
 
       // 1. Cria a visita
-      const resultado = await visitaModel.criarVisita({
-        cliente_id,
-        data_visita,
-        preco,
-        descricao,
-        status,
-      });
+      // const resultado = await visitaModel.criarVisita({
+      //   cliente_id,
+      //   data_visita,
+      //   preco,
+      //   descricao,
+      //   status,
+      // });
+
+      const resultado = 'teste';
 
       const visita_id = resultado.insertId;
       let idAnexo = null;
@@ -72,11 +75,11 @@ class VisitaController {
 
       // 3. Busca nome e email do cliente
       const cliente = await clienteModel.buscarPorId(cliente_id);
-      if (cliente?.email) {
-        // 4. Cria evento no Google Calendar
-        await criarEventoNoCalendar({
-          nomeCliente: cliente.nome,
-          emailCliente: cliente.email,
+
+      if (cliente[0].email) {
+        await agendarNoGoogle.criarEventoNoCalendar({
+          nomeCliente: cliente[0].nome,
+          emailCliente: cliente[0].email,
           data_visita,
         });
       }
