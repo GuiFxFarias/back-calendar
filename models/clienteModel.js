@@ -23,10 +23,10 @@ class ClienteModel {
     return this.executaQuery(sql, [tenant_id, id]);
   }
 
-  criarCliente({ nome, telefone, endereco, tenant_id }) {
+  criarCliente({ nome, telefone, endereco, tenant_id, email }) {
     const sql =
-      'INSERT INTO clientes (nome, telefone, endereco, tenant_id) VALUES (?, ?, ?, ?)';
-    return this.executaQuery(sql, [nome, telefone, endereco, tenant_id]);
+      'INSERT INTO clientes (nome, telefone, endereco, tenant_id, email) VALUES (?, ?, ?, ?, ?)';
+    return this.executaQuery(sql, [nome, telefone, endereco, tenant_id, email]);
   }
 
   criarClienteSemCadastro({ nome, telefone, tenant_id }) {
@@ -35,13 +35,20 @@ class ClienteModel {
     return this.executaQuery(sql, [nome, telefone, tenant_id]);
   }
 
-  atualizarCliente({ id, nome, telefone, endereco, tenant_id }) {
+  atualizarCliente({ id, nome, telefone, endereco, tenant_id, email }) {
     const sql = `
       UPDATE clientes 
-      SET nome = ?, telefone = ?, endereco = ? 
+      SET nome = ?, telefone = ?, endereco = ?, email = ?
       WHERE tenant_id = ? AND id = ?
     `;
-    return this.executaQuery(sql, [nome, telefone, endereco, tenant_id, id]);
+    return this.executaQuery(sql, [
+      nome,
+      telefone,
+      endereco,
+      tenant_id,
+      id,
+      email,
+    ]);
   }
 
   deletar(id, tenant_id) {

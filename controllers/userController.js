@@ -24,8 +24,9 @@ class UserController {
       }
 
       const usuario = resposta[0];
-
+      // const hash = await bcrypt.hash(senha, 10);
       const senhaValida = await bcrypt.compare(String(senha), usuario.senha);
+
       if (!senhaValida) {
         return res.status(401).json({
           sucesso: false,
@@ -33,31 +34,37 @@ class UserController {
         });
       }
 
-      // ✅ Gerar token JWT com tenant_id incluso
       const token = jwt.sign(
         {
           id: usuario.id,
           email: usuario.email,
-          tenant_id: usuario.tenant_id, // <- aqui incluímos o tenant
+          tenant_id: usuario.tenant_id,
         },
         process.env.JWT_SECRET,
         { expiresIn: '1h' }
       );
 
+      const expiration = new Date(Date.now() + 1000 * 60 * 60);
+
       return res.status(200).json({
         sucesso: true,
-        usuario,
+        usuario: {
+          id: usuario.id,
+          email: usuario.email,
+          nome: usuario.nome,
+          tenant_id: usuario.tenant_id,
+        },
         value: {
           token,
-          tenant_id: usuario.tenant_id, // <- também no retorno explícito
-          expiration: new Date(Date.now() + 1000 * 60 * 60 * 1),
+          tenant_id: usuario.tenant_id,
+          expiration,
         },
       });
     } catch (erro) {
       console.error('Erro ao buscar usuário:', erro);
       return res.status(500).json({
         sucesso: false,
-        erro: erro.message,
+        erro: 'Erro interno do servidor',
       });
     }
   }
