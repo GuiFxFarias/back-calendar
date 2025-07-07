@@ -21,8 +21,8 @@ router.post('/login', userController.buscarUsers);
 router.get('/buscarVisita', autenticar, visitaController.listarPorData);
 // Buscar todas as visitas
 router.get('/todasVisitas', autenticar, visitaController.listarTodas);
-// Buscar visita por ID (CORRIGIDO: adicionada barra antes de :id)
-router.get('/visita/:id', autenticar, visitaController.buscarPorId);
+// Buscar visita por ID
+router.get('/visita:id', autenticar, visitaController.buscarPorId);
 // Criar nova visita
 router.post(
   '/criarVisita',
@@ -30,11 +30,11 @@ router.post(
   upload.array('anexo_doc'),
   visitaController.criar
 );
-// Deletar visita (CORRIGIDO: adicionada barra antes de :id)
-router.delete('/visita/:id', autenticar, visitaController.deletar);
+// Deletar visita
+router.delete('/visita:id', autenticar, visitaController.deletar);
 // Editar visita
 router.put(
-  '/visita/:id',
+  '/visita:id',
   autenticar,
   upload.array('anexo_doc'),
   visitaController.editar
