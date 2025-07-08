@@ -1,0 +1,13 @@
+Pai Feature,Work Item Type,Title,Complexidade Front,Complexidade Back,Soma de Effort
+Solicitação de pedido,User Story,Solicitação de pedido,,,5
+Semaforo de clientes,User Story,Avaliação do ultimo pedido de venda,,,2
+KAI,User Story,Chatbot e funcionamento da KAI,3,5,8
+Histórico de pedidos,User Story,Listar todos os pedidos (histórico),,,3
+Gerenciar usuários,User Story,Avaliação gestor,1,3,3
+Gerenciar usuários,User Story,Avaliação vendedor,1,2,3
+Gerenciar usuários,User Story,Gerenciar usuários,3,2,5
+Gerenciar usuários,User Story,Rotas dos vendedores,2,2,3
+Estoque,User Story,Estoque de produtos,,,5
+Clientes próximos,User Story,Clientes próximos,,,2
+Check-in & Check-out,User Story,Atendimento do CheckIn CheckOut,,,3
+Autenticação,User Story,Login na plataforma,2,1,3

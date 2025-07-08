@@ -143,9 +143,6 @@ class VisitaController {
   }
 
   async editar(req, res) {
-    const { preco, status, idAnexo, cliente_id } = req.body;
-    console.log(cliente_id);
-
     try {
       const { id } = req.params;
       const { preco, status, idAnexo, cliente_id } = req.body;
