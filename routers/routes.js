@@ -22,7 +22,7 @@ router.get('/buscarVisita', autenticar, visitaController.listarPorData);
 // Buscar todas as visitas
 router.get('/todasVisitas', autenticar, visitaController.listarTodas);
 // Buscar visita por ID
-router.get('/visita:id', autenticar, visitaController.buscarPorId);
+router.get('/visita/:id', autenticar, visitaController.buscarPorId);
 // Criar nova visita
 router.post(
   '/criarVisita',
@@ -31,10 +31,10 @@ router.post(
   visitaController.criar
 );
 // Deletar visita
-router.delete('/visita:id', autenticar, visitaController.deletar);
+router.delete('/visita/:id', autenticar, visitaController.deletar);
 // Editar visita
 router.put(
-  '/visita:id',
+  '/visita/:id',
   autenticar,
   upload.array('anexo_doc'),
   visitaController.editar
@@ -57,6 +57,17 @@ router.post(
 router.delete('/cliente/:id', autenticar, clienteController.deletar);
 // Editar cliente por id
 router.put('/cliente/:id', autenticar, clienteController.atualizarCliente);
+// Rota para adicionar anexos no cliente
+router.post(
+  '/anexos-cliente',
+  autenticar,
+  upload.array('arquivo'),
+  anexoController.criarParaCliente
+);
+// Buscar anexos por cliente
+router.get('/anexos-cliente/:id', autenticar, anexoController.listarPorCliente);
+// Deletar anexos do cliente
+router.delete('/anexos/:id', autenticar, anexoController.deletar);
 
 // ANEXOS
 // Buscar anexos por visita_id

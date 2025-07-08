@@ -143,9 +143,12 @@ class VisitaController {
   }
 
   async editar(req, res) {
+    const { preco, status, idAnexo, cliente_id } = req.body;
+    console.log(cliente_id);
+
     try {
       const { id } = req.params;
-      const { preco, status, idAnexo } = req.body;
+      const { preco, status, idAnexo, cliente_id } = req.body;
       const arquivos = req.files;
 
       if (preco === undefined || !status) {
@@ -163,6 +166,7 @@ class VisitaController {
 
           await anexoModel.criarAnexo(
             {
+              cliente_id,
               visita_id: id,
               arquivo_url,
               tipo,
@@ -180,6 +184,7 @@ class VisitaController {
       await visitaModel.editarVisita(
         id,
         {
+          cliente_id,
           preco,
           status,
           idAnexo: novoIdAnexo,
