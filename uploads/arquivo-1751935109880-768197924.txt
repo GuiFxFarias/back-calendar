@@ -1,0 +1,94 @@
+RESUMO DOS ARQUIVOS
+1. Política Comercial 2023 - Wiipo (v1.4)
+
+    Produto: Plataforma Wiipo Flex com Clube de Benefícios Wiipo.
+
+    Modalidades: Planos recorrentes e não recorrentes.
+
+    Descontos: Até 100% no custo mensal por cartão, dependendo da composição do pacote.
+
+    Vantagens: Clube com mais de 160 mil parceiros, pagamento via folha e app próprio.
+
+    Requisitos: Mínimo de R$100/mês de recorrência para isenção total.
+
+2. Política Comercial 2024 - Compliance (v1.4)
+
+    Solução: Compliance Fiscal para geração e gestão de obrigações tributárias.
+
+    Requisitos: Comercialização por CNPJ e faturamento anual.
+
+    Destaques: Bloco K, Reinf, Auditor Fiscal e integração com Senior X.
+
+    Modalidades: CDU, SaaS e LUT (limitado).
+
+    Tabela de preços específica por pacote e CNPJ
+
+3. Política Comercial 2024 - IT Services (v1.3)
+
+    Ofertas: Pacotes de análise de infraestrutura, segurança, VPN, IaaS.
+
+    Preço: Variável conforme nº de servidores.
+
+    Canal de venda: Exclusivamente pela Senior X Store.
+
+4. Política Comercial 2024 - UCS Capacitação (v2.2)
+
+    Ofertas: Pacotes EAD para clientes e canais durante implantação.
+
+    Condições: Vigência mínima de 12 meses, com multa por cancelamento antecipado.
+
+    Pré-requisitos: Certificação obrigatória para uso do perfil Supervisor no UCS Online.
+
+5. Política Comercial 2025 - ERP Senior X (v2.5)
+
+    Produto: ERP 100% Cloud, focado em empresas com processos padronizados.
+
+    Módulos: Backoffice, Serviços, Industrial, Contabilidade Gerencial.
+
+    Dependência: Módulo Backoffice obrigatório para demais.
+
+    Preço: Mensalidade regressiva conforme prazo (12-48 meses)
+
+    .
+
+6. Política Comercial 2025 - ERP XT e CRM (v2.10)
+
+    ERP XT: Comercialização por área (não por processo). Obrigatório para novos clientes.
+
+    CRM: Starter, Advanced, integração com ERP, modelos de upgrade e migração.
+
+    Aplicativos: Requisição Senior X, Gestor Senior, Venda+, AgroVerus.
+
+    Ofertas adicionais: EDI bancário, Banking (Pix e Boleto), Marketing Intelligence
+
+    .
+
+7. Política Comercial 2025 - Gestão de Acesso e Segurança (v3.2)
+
+    Solução: Ronda Senior X.
+
+    Módulos: Controle de Acesso, Sensores, Portaria Remota, Reconhecimento Facial.
+
+    Comercialização: SaaS apenas; alguns módulos requerem dependência.
+
+    Integração: Com Gestão de Pessoas HCM e dispositivos homologados .
+
+8. Política Comercial 2025 - Logística (v4.0)
+
+    Ofertas: WMS, TMS, LMS, YMS, Plataforma de Fretes.
+
+    Precificação: Por número de usuários + volume expedido.
+
+    SaaS: Obrigatório para algumas ofertas (ex: WMS X).
+
+    Novidades: AI Logistics, Confirma Fácil (GKO), check-list e App Balança .
+
+9. Política Comercial 2025 - Procedimentos e Princípios Gerais (v2.3)
+
+    Modalidades: SaaS, CDU (restrita), LUT (restrita).
+
+    Diretrizes: Upgrade, downgrade, cancelamento, transferência e reativação.
+
+    Serviços: Modelos de implantação (orientado, padronizado, personalizado), matriz de faturamento, suporte técnico.
+
+    Tabelas: Por região, hora técnica, viagens e impostos aplicáveis .
