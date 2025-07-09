@@ -28,10 +28,49 @@ class UserModel {
     return this.executaQuery(sql, [tenant_id]);
   }
 
-  criarUsuario({ nome, email, senha, tenant_id }) {
-    const sql =
-      'INSERT INTO usuarios (nome, email, senha, tenant_id) VALUES (?, ?, ?, ?)';
-    return this.executaQuery(sql, [nome, email, senha, tenant_id]);
+  criarUsuario({
+    nome,
+    email,
+    telefone,
+    senha,
+    tenant_id,
+    inicio_teste_gratis,
+  }) {
+    const sql = `
+    INSERT INTO usuarios (nome, email, telefone, senha, tenant_id, inicio_teste_gratis)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `;
+    return this.executaQuery(sql, [
+      nome,
+      email,
+      telefone,
+      senha,
+      tenant_id,
+      inicio_teste_gratis,
+    ]);
+  }
+
+  salvarTokenRecuperacao(email, token, expira) {
+    const sql = `
+    UPDATE usuarios
+    SET token_recuperacao = ?, token_expira_em = ?
+    WHERE email = ?
+  `;
+    return this.executaQuery(sql, [token, expira, email]);
+  }
+
+  buscarPorToken(token) {
+    const sql = `SELECT * FROM usuarios WHERE token_recuperacao = ?`;
+    return this.executaQuery(sql, [token]).then((res) => res[0]);
+  }
+
+  atualizarSenha(email, novaSenha) {
+    const sql = `
+    UPDATE usuarios
+    SET senha = ?, token_recuperacao = NULL, token_expira_em = NULL
+    WHERE email = ?
+  `;
+    return this.executaQuery(sql, [novaSenha, email]);
   }
 }
 

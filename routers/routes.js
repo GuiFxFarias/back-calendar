@@ -13,6 +13,12 @@ const router = Router();
 // ===== ROTA PÚBLICA =====
 // Login de usuario (SEM middleware de autenticação)
 router.post('/login', userController.buscarUsers);
+// Cadastrar usuário
+router.post('/cadastra', userController.criarUsers);
+// Esqueci a senha
+router.post('/esqueci-senha', userController.esqueciSenha);
+// Redefinir senha
+router.post('/redefinir-senha', userController.redefinirSenha);
 
 // ===== ROTAS PROTEGIDAS (COM middleware de autenticação) =====
 
