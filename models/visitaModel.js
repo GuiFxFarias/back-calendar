@@ -57,7 +57,7 @@ class VisitaModel {
     return this.executaQuery(sql, [tenant_id, id]);
   }
 
-  editarVisita(id, { preco, status, idAnexo = null }, tenant_id, cliente_id) {
+  editarVisita(id, { preco, status, idAnexo, cliente_id }, tenant_id) {
     const sql = `
       UPDATE visitas
       SET preco = ?, status = ?, idAnexo = ?

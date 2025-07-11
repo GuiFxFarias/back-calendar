@@ -27,7 +27,14 @@ app.listen(PORT, (error) => {
   }
 
   // enviarEmailTeste();
-  // enviarMensagemWhatsApp('+5516988447335', 'Farias');
+  // enviarMensagemWhatsApp(
+  //   '+5516988447335',
+  //   'Farias',
+  //   'Equipe de dev',
+  //   'Teste produto',
+  //   'Minha empresa',
+  //   'Equipe'
+  // );
 
   console.log(`✅ Server is running on port ${PORT}`);
 });
