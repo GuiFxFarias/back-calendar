@@ -98,7 +98,7 @@ class ClienteController {
   async atualizarCliente(req, res) {
     try {
       const { id } = req.params;
-      const { nome, telefone, endereco } = req.body;
+      const { nome, telefone, endereco, email } = req.body;
 
       if (!nome || !telefone) {
         return res
@@ -111,6 +111,7 @@ class ClienteController {
         nome,
         telefone,
         endereco,
+        email,
         tenant_id: req.tenantId,
       });
 

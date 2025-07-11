@@ -45,9 +45,9 @@ class ClienteModel {
       nome,
       telefone,
       endereco,
+      email,
       tenant_id,
       id,
-      email,
     ]);
   }
 
