@@ -40,10 +40,14 @@ class MensagemProgramadaModel {
 
   buscarTodas(tenant_id) {
     const sql = `
-      SELECT * FROM mensagens_programadas
-      WHERE tenant_id = ?
-      ORDER BY proxima_data_envio ASC
-    `;
+    SELECT 
+      m.*,
+      c.nome AS nome_cliente
+    FROM mensagens_programadas m
+    LEFT JOIN clientes c ON m.cliente_id = c.id
+    WHERE m.tenant_id = ?
+    ORDER BY m.proxima_data_envio ASC
+  `;
     return this.executaQuery(sql, [tenant_id]);
   }
 

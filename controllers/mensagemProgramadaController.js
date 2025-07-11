@@ -55,7 +55,7 @@ class MensagemProgramadaController {
 
   async listar(req, res) {
     try {
-      const mensagens = await mensagemProgramadaModel.buscarTodas(req.tenantId); // ✅ busca segura
+      const mensagens = await mensagemProgramadaModel.buscarTodas(req.tenantId);
       res.status(200).json(mensagens);
     } catch (error) {
       console.error('Erro ao listar mensagens:', error);

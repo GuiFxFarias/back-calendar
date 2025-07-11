@@ -3,7 +3,7 @@ const router = require('./routers/indexRotas.js');
 const cors = require('cors');
 const { enviarMensagemWhatsApp } = require('./services/twilioService.js');
 
-// require('./services/agendadorMensagens.js');
+require('./services/agendadorMensagens.js');
 
 const express = require('express');
 const { enviarEmailTeste } = require('./services/testeEmail.js');
