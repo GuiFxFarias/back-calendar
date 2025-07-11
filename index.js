@@ -17,6 +17,8 @@ app.use(
   })
 );
 
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 router(app, express);
 
 const PORT = 3001;
@@ -25,16 +27,6 @@ app.listen(PORT, (error) => {
     console.log('Error running server');
     return;
   }
-
-  // enviarEmailTeste();
-  // enviarMensagemWhatsApp(
-  //   '+5516988447335',
-  //   'Farias',
-  //   'Equipe de dev',
-  //   'Teste produto',
-  //   'Minha empresa',
-  //   'Equipe'
-  // );
 
   console.log(`✅ Server is running on port ${PORT}`);
 });
