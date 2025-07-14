@@ -111,6 +111,13 @@ router.delete(
   mensagensProgramadasController.deletar
 );
 
+// Editar uma mensagem programada
+router.put(
+  '/mensagens-programadas/:id',
+  autenticar,
+  mensagensProgramadasController.editar
+);
+
 //USUARIOS
 // Logout de usuários
 router.post('/logout', (req, res) => {

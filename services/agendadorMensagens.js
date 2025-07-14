@@ -42,7 +42,7 @@ cron.schedule('0 * * * *', async () => {
         });
 
         const cliente = msg.nome_cliente || 'Cliente';
-
+        const texto = msg.texto?.substring(0, 500) || 'Mensagem padrão';
         const numeroDestino = `${msg.telefone}`;
 
         const message = await client.messages.create({
@@ -51,7 +51,8 @@ cron.schedule('0 * * * *', async () => {
           contentSid: TEMPLATE_SID,
           contentVariables: JSON.stringify({
             1: cliente,
-            2: numeroUsuario,
+            2: texto,
+            3: numeroUsuario,
           }),
         });
 
