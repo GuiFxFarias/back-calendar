@@ -1,4 +1,5 @@
 const { Router } = require('express');
+const express = require('express');
 const visitaController = require('../controllers/visitaController');
 const clienteController = require('../controllers/clienteController');
 const anexoController = require('../controllers/anexoController');
@@ -134,5 +135,12 @@ router.post('/logout', (req, res) => {
 //PAGAMENTO
 // Pagamentos
 router.post('/pagamento', pagamentoController.criarCheckoutSession);
+
+//WebHook para liberar o usuario
+router.post(
+  '/webhook',
+  express.raw({ type: 'application/json' }),
+  pagamentoController.webhook
+);
 
 module.exports = router;
