@@ -59,7 +59,7 @@ async function webhook(req, res) {
   let event;
 
   try {
-    // req.body é o buffer cru porque usamos express.raw()
+    // req.body é o buffer cru (graças ao express.raw())
     event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
   } catch (err) {
     console.error('❌ Erro ao validar webhook:', err.message);
@@ -76,17 +76,19 @@ async function webhook(req, res) {
 
     try {
       await db.execute(
-        `INSERT INTO pagamentos (usuario_id, tenant_id, plano_id, valor_pago, criado_em) VALUES (?, ?, ?, ?, NOW())`,
+        `INSERT INTO pagamentos (usuario_id, tenant_id, plano_id, valor_pago, criado_em)
+         VALUES (?, ?, ?, ?, NOW())`,
         [usuario_id, tenant_id, plano_id, valor_pago]
       );
 
       console.log(`✅ Pagamento confirmado para usuário ${usuario_id}`);
     } catch (err) {
       console.error('❌ Erro ao salvar pagamento no banco:', err);
+      return res.status(500).send('Erro ao salvar pagamento');
     }
   }
 
-  res.status(200).json({ received: true });
+  return res.status(200).json({ received: true });
 }
 
 module.exports = {
