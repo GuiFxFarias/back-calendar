@@ -25,4 +25,4 @@ conexao.getConnection((err, connection) => {
   }
 });
 
-module.exports = conexao.promise();
+module.exports = conexao;
