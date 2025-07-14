@@ -3,6 +3,7 @@ const visitaController = require('../controllers/visitaController');
 const clienteController = require('../controllers/clienteController');
 const anexoController = require('../controllers/anexoController');
 const userController = require('../controllers/userController');
+const pagamentoController = require('../controllers/pagamentoController');
 const mensagensVisitaController = require('../controllers/mensagensVisitaController');
 const mensagensProgramadasController = require('../controllers/mensagemProgramadaController');
 const upload = require('../middlewares/upload');
@@ -129,5 +130,9 @@ router.post('/logout', (req, res) => {
 
   res.status(200).json({ sucesso: true, mensagem: 'Logout efetuado' });
 });
+
+//PAGAMENTO
+// Pagamentos
+router.post('/pagamento', pagamentoController.criarCheckoutSession);
 
 module.exports = router;
