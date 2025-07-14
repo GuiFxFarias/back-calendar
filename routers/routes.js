@@ -1,10 +1,12 @@
 const { Router } = require('express');
+const express = require('express');
 const visitaController = require('../controllers/visitaController');
 const clienteController = require('../controllers/clienteController');
 const anexoController = require('../controllers/anexoController');
 const userController = require('../controllers/userController');
 const mensagensVisitaController = require('../controllers/mensagensVisitaController');
 const mensagensProgramadasController = require('../controllers/mensagemProgramadaController');
+const pagamentoController = require('../controllers/pagamentoController');
 const upload = require('../middlewares/upload');
 const autenticar = require('../middlewares/authMiddleware');
 
@@ -129,5 +131,15 @@ router.post('/logout', (req, res) => {
 
   res.status(200).json({ sucesso: true, mensagem: 'Logout efetuado' });
 });
+
+//PAGAMENTO
+// Pagamentos
+router.post('/pagamento', pagamentoController.criarCheckoutSession);
+
+router.post(
+  '/webhook',
+  express.raw({ type: 'application/json' }),
+  pagamentoController.webhook
+);
 
 module.exports = router;
