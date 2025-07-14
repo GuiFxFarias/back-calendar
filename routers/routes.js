@@ -46,7 +46,11 @@ router.put(
 router.get('/clientes', autenticar, clienteController.listarTodos);
 router.get('/cliente/:id', autenticar, clienteController.buscarPorId);
 router.post('/criarCliente', autenticar, clienteController.criar);
-router.post('/clienteSemCadastro', autenticar, clienteController.criarSemCadastro);
+router.post(
+  '/clienteSemCadastro',
+  autenticar,
+  clienteController.criarSemCadastro
+);
 router.delete('/cliente/:id', autenticar, clienteController.deletar);
 router.put('/cliente/:id', autenticar, clienteController.atualizarCliente);
 router.post(

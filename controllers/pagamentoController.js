@@ -68,6 +68,7 @@ async function webhook(req, res) {
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
+    console.log('✅ Webhook processado corretamente!', session);
 
     const usuario_id = session.metadata?.usuario_id;
     const tenant_id = session.metadata?.tenant_id;
