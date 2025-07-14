@@ -55,6 +55,7 @@ async function criarCheckoutSession(req, res) {
 
 async function webhook(req, res) {
   const sig = req.headers['stripe-signature'];
+  const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
   let event;
 
@@ -68,21 +69,34 @@ async function webhook(req, res) {
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
-    console.log('✅ Webhook processado corretamente!', session);
+
+    console.log('✅ Webhook processado corretamente!');
+    console.log('📦 Session:', session);
 
     const usuario_id = session.metadata?.usuario_id;
     const tenant_id = session.metadata?.tenant_id;
     const plano_id = session.metadata?.plano_id;
-    const valor_pago = session.amount_total / 100;
+    const valor = session.amount_total / 100;
+    const stripe_session_id = session.id;
+    const status = session.payment_status;
+
+    // Validação básica
+    if (!usuario_id || !tenant_id || !plano_id || !valor) {
+      console.error('❌ Dados incompletos no metadata do webhook');
+      return res.status(400).send('Dados incompletos para registrar pagamento');
+    }
 
     try {
       await db.execute(
-        `INSERT INTO pagamentos (usuario_id, tenant_id, plano_id, valor_pago, criado_em)
-         VALUES (?, ?, ?, ?, NOW())`,
-        [usuario_id, tenant_id, plano_id, valor_pago]
+        `INSERT INTO pagamentos (
+          usuario_id, tenant_id, plano_id, stripe_session_id, status, valor, criado_em
+        ) VALUES (?, ?, ?, ?, ?, ?, NOW())`,
+        [usuario_id, tenant_id, plano_id, stripe_session_id, status, valor]
       );
 
-      console.log(`✅ Pagamento confirmado para usuário ${usuario_id}`);
+      console.log(
+        `✅ Pagamento registrado no banco para usuário ${usuario_id}`
+      );
     } catch (err) {
       console.error('❌ Erro ao salvar pagamento no banco:', err);
       return res.status(500).send('Erro ao salvar pagamento');
