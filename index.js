@@ -8,7 +8,6 @@ const { enviarMensagemWhatsApp } = require('./services/twilioService.js');
 require('./services/agendadorMensagens.js');
 
 const express = require('express');
-const { enviarEmailTeste } = require('./services/testeEmail.js');
 const app = express();
 
 app.use(
