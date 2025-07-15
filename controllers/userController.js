@@ -210,6 +210,24 @@ class UserController {
       return res.status(500).json({ sucesso: false, erro: 'Erro interno.' });
     }
   }
+
+  async usuarioAtual(req, res) {
+    try {
+      const { usuario_id, tenant_id } = req;
+
+      // Se quiser consultar dados no banco:
+      // const usuario = await clienteModel.buscarPorId(usuario_id, tenant_id);
+      // return res.status(200).json(usuario);
+
+      res.status(200).json({
+        id: usuario_id,
+        tenant_id,
+      });
+    } catch (err) {
+      console.error('Erro ao buscar usuário atual:', err);
+      res.status(500).json({ erro: 'Erro interno' });
+    }
+  }
 }
 
 module.exports = new UserController();

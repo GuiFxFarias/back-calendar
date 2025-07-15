@@ -107,6 +107,9 @@ router.post('/logout', (req, res) => {
   res.status(200).json({ sucesso: true, mensagem: 'Logout efetuado' });
 });
 
+// Usuário atual do sistema
+router.get('/usuario', autenticar, userController.usuarioAtual);
+
 // PAGAMENTOS
 router.post('/pagamento', pagamentoController.criarCheckoutSession);
 
@@ -116,5 +119,7 @@ router.post(
   express.raw({ type: 'application/json' }),
   pagamentoController.webhook
 );
+
+router.get('/acesso', autenticar, pagamentoController.verificarAcesso);
 
 module.exports = router;

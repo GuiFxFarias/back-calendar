@@ -1,7 +1,7 @@
 require('dotenv').config();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const db = require('../conexao');
-const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+const pagamentoModel = require('../models/pagamentoModel');
 
 async function criarCheckoutSession(req, res) {
   try {
@@ -50,6 +50,18 @@ async function criarCheckoutSession(req, res) {
   } catch (error) {
     console.error('Erro ao criar sessão de pagamento:', error);
     res.status(500).json({ erro: 'Erro interno ao criar pagamento' });
+  }
+}
+
+async function verificarAcesso(req, res) {
+  try {
+    const usuario_id = req.usuarioId;
+    const temAcesso = await pagamentoModel.verificarAcesso(usuario_id);
+
+    res.status(200).json({ acessoLiberado: temAcesso });
+  } catch (err) {
+    console.error('Erro ao verificar acesso:', err);
+    res.status(500).json({ erro: 'Erro interno ao verificar acesso' });
   }
 }
 
@@ -109,4 +121,5 @@ async function webhook(req, res) {
 module.exports = {
   criarCheckoutSession,
   webhook,
+  verificarAcesso,
 };
