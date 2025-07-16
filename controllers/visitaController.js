@@ -29,18 +29,22 @@ class VisitaController {
 
   async criar(req, res) {
     try {
-      const { cliente_id, data_visita, preco, descricao, status } = req.body;
+      const { cliente_id, preco, descricao, status } = req.body;
       const arquivos = req.files;
 
       if (
         !cliente_id ||
-        !data_visita ||
+        !req.body.data_visita ||
         preco === undefined ||
         !descricao ||
         !status
       ) {
         return res.status(400).json({ erro: 'Campos obrigatórios ausentes.' });
       }
+
+      // Adiciona +3h ao data_visita
+      let data_visita = new Date(req.body.data_visita);
+      data_visita = new Date(data_visita.getTime() + 3 * 60 * 60 * 1000);
 
       // 1. Cria a visita
       const resultado = await visitaModel.criarVisita(
@@ -92,7 +96,7 @@ class VisitaController {
         await agendarNoGoogle.criarEventoNoCalendar({
           nomeCliente: cliente[0].nome,
           emailCliente: cliente[0].email,
-          data_visita,
+          data_visita, // já com +3h
         });
       }
 

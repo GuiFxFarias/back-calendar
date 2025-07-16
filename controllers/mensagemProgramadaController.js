@@ -39,7 +39,7 @@ class MensagemProgramadaController {
         dias_intervalo,
         proxima_data_envio,
         ativo,
-        tenant_id: req.tenantId, // ✅ tenant incluído
+        tenant_id: req.tenantId,
       });
 
       res
