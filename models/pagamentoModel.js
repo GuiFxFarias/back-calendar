@@ -13,6 +13,17 @@ class PagamentoModel {
     });
   }
 
+  buscarPagamentoValido(usuario_id, tenant_id) {
+    const sql = `
+      SELECT plano_id, criado_em
+      FROM pagamentos
+      WHERE usuario_id = ? AND tenant_id = ? AND status = 'paid'
+      ORDER BY criado_em DESC
+      LIMIT 1
+    `;
+    return this.executaQuery(sql, [usuario_id, tenant_id]);
+  }
+
   async verificarAcesso(usuario_id) {
     const diasPlano = {
       mensal: 30,

@@ -3,11 +3,14 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { enviarEmail } = require('../services/emailService.js');
+const {
+  verificaAcessoLiberado,
+} = require('../middlewares/verificaTesteGratuito.js');
 
-const DIAS_TOLERANCIA = 7;
 class UserController {
   async buscarUsers(req, res) {
     const { email, senha } = req.body;
+    const assinatura = req.query.assinatura == 'true'; // pegar da query
 
     try {
       if (!email || !senha) {
@@ -36,18 +39,13 @@ class UserController {
         });
       }
 
-      // 🔐 Verifica validade do teste grátis
-      if (usuario.inicio_teste_gratis) {
-        const diasPassados =
-          (new Date() - new Date(usuario.inicio_teste_gratis)) /
-          (1000 * 60 * 60 * 24);
+      const acesso_liberado = await verificaAcessoLiberado(usuario);
 
-        if (diasPassados >= DIAS_TOLERANCIA) {
-          return res.status(403).json({
-            sucesso: false,
-            erro: 'Seu teste gratuito expirou. Entre em contato para continuar usando a plataforma.',
-          });
-        }
+      if (!acesso_liberado && !assinatura) {
+        return res.status(403).json({
+          sucesso: false,
+          erro: 'Seu acesso expirou. Acesse a página de pagamento para renovar.',
+        });
       }
 
       // Geração de token
@@ -70,6 +68,7 @@ class UserController {
           email: usuario.email,
           nome: usuario.nome,
           tenant_id: usuario.tenant_id,
+          acesso_liberado, // ✅ INCLUÍDO
         },
         value: {
           token,
@@ -96,8 +95,6 @@ class UserController {
           erro: 'Todos os campos são obrigatórios.',
         });
       }
-
-      console.log(inicio_teste_gratis);
 
       const senhaCriptografada = await bcrypt.hash(senha, 10);
 
