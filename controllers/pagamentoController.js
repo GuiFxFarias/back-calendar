@@ -9,7 +9,7 @@ async function criarCheckoutSession(req, res) {
 
     // Defina os planos com segurança no backend
     const planos = {
-      mensal: { nome: 'Mensal', meses: 1, valor: 2 },
+      mensal: { nome: 'Mensal', meses: 1, valor: 75 },
       trimestral: { nome: 'Trimestral', meses: 3, valor: 60 },
       anual: { nome: 'Anual', meses: 12, valor: 50 },
     };
