@@ -10,7 +10,7 @@ const {
 class UserController {
   async buscarUsers(req, res) {
     const { email, senha } = req.body;
-    const assinatura = req.query.assinatura == 'true'; // pegar da query
+    const assinatura = req.query.assinatura == 'true';
 
     try {
       if (!email || !senha) {
@@ -68,7 +68,7 @@ class UserController {
           email: usuario.email,
           nome: usuario.nome,
           tenant_id: usuario.tenant_id,
-          acesso_liberado, // ✅ INCLUÍDO
+          acesso_liberado,
         },
         value: {
           token,
