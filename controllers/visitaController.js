@@ -90,15 +90,15 @@ class VisitaController {
       }
 
       // 3. Busca nome e email do cliente
-      const cliente = await clienteModel.buscarPorId(cliente_id, req.tenantId);
+      // const cliente = await clienteModel.buscarPorId(cliente_id, req.tenantId);
 
-      if (cliente[0]?.email) {
-        await agendarNoGoogle.criarEventoNoCalendar({
-          nomeCliente: cliente[0].nome,
-          emailCliente: cliente[0].email,
-          data_visita, // já com +3h
-        });
-      }
+      // if (cliente[0]?.email) {
+      //   await agendarNoGoogle.criarEventoNoCalendar({
+      //     nomeCliente: cliente[0].nome,
+      //     emailCliente: cliente[0].email,
+      //     data_visita, // já com +3h
+      //   });
+      // }
 
       res
         .status(201)
