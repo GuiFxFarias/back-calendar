@@ -22,13 +22,7 @@ class MensagemProgramadaController {
         ativo,
       } = req.body;
 
-      if (
-        !cliente_id ||
-        !telefone ||
-        !texto ||
-        !dias_intervalo ||
-        !proxima_data_envio
-      ) {
+      if (!cliente_id || !telefone || !texto || !proxima_data_envio) {
         return res.status(400).json({ erro: 'Campos obrigatórios ausentes.' });
       }
 
