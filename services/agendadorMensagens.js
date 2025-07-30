@@ -7,7 +7,7 @@ const client = twilio(
   process.env.TWILIO_AUTH_TOKEN
 );
 const FROM_WHATSAPP = process.env.TWILIO_WHATSAPP_NUMBER;
-const TEMPLATE_SID = 'HX33745f4f44dbcfa480ebc631a7f912f5';
+const TEMPLATE_SID = 'HXfbc52ab9226f9b8561f5a0d95d6bbd9e';
 
 cron.schedule('0 * * * *', async () => {
   console.log('⏰ Verificando mensagens programadas...');
