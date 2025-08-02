@@ -15,13 +15,27 @@ class VisitaModel {
 
   buscarPorData(dataInicio, dataFim, tenant_id) {
     const sql = `
-    SELECT * FROM visitas
-    WHERE tenant_id = ?
-      AND data_visita >= ?
-      AND data_visita < DATE_ADD(?, INTERVAL 1 DAY)
-    ORDER BY data_visita ASC
+    SELECT
+    v.*,
+    JSON_ARRAYAGG(JSON_OBJECT('id', t.id, 'nome', t.nome)) AS tags
+    FROM visitas v
+    LEFT JOIN visita_tags vt ON vt.visita_id = v.id
+    LEFT JOIN tags t ON t.id = vt.tag_id
+    WHERE v.tenant_id = ?
+      AND v.data_visita >= ?
+      AND v.data_visita < DATE_ADD(?, INTERVAL 1 DAY)
+    GROUP BY v.id
+    ORDER BY v.data_visita ASC;
   `;
-    return this.executaQuery(sql, [tenant_id, dataInicio, dataFim]);
+    return this.executaQuery(sql, [tenant_id, dataInicio, dataFim]).then(
+      (resultados) =>
+        resultados.map((visita) => ({
+          ...visita,
+          tags: Array.isArray(visita.tags)
+            ? visita.tags
+            : JSON.parse(visita.tags),
+        }))
+    );
   }
 
   criarVisita(
