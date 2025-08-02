@@ -9,6 +9,8 @@ const mensagensVisitaController = require('../controllers/mensagensVisitaControl
 const mensagensProgramadasController = require('../controllers/mensagemProgramadaController');
 const upload = require('../middlewares/upload');
 const autenticar = require('../middlewares/authMiddleware');
+const iaController = require('../controllers/iaController');
+const tagController = require('../controllers/tagController');
 
 const router = Router();
 
@@ -40,6 +42,20 @@ router.put(
   autenticar,
   upload.array('anexo_doc'),
   visitaController.editar
+);
+
+// IA
+router.post('/ia/perguntar', autenticar, iaController.perguntar);
+
+// TAGS
+router.post('/tags', autenticar, tagController.criarTag);
+router.get('/tags', autenticar, tagController.listarTags);
+router.post('/tags/vincular', autenticar, tagController.vincularTag);
+router.post('/tags/remover', autenticar, tagController.removerTag);
+router.get(
+  '/tags/visita/:visita_id',
+  autenticar,
+  tagController.listarTagsDaVisita
 );
 
 // CLIENTES

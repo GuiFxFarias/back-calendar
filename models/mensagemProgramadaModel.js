@@ -94,6 +94,34 @@ class MensagemProgramadaModel {
     `;
     return this.executaQuery(sql, [tenant_id, id]);
   }
+
+  // IA Pesquisas
+
+  listarDeHoje(tenant_id) {
+    const sql = `
+    SELECT * FROM mensagens_programadas
+    WHERE DATE(proxima_data_envio) = CURDATE()
+    AND ativo = 1
+    AND tenant_id = ?
+  `;
+    return this.executaQuery(sql, [tenant_id]);
+  }
+
+  contarMensagensAtivas(tenant_id) {
+    const sql = `SELECT COUNT(*) as total FROM mensagens_programadas WHERE ativo = 1 AND tenant_id = ?`;
+    return this.executaQuery(sql, [tenant_id]).then((res) => res[0].total);
+  }
+
+  contarMensagensMes(tenant_id) {
+    const sql = `
+    SELECT COUNT(*) as total
+    FROM mensagens_programadas
+    WHERE MONTH(proxima_data_envio) = MONTH(CURDATE())
+      AND YEAR(proxima_data_envio) = YEAR(CURDATE())
+      AND tenant_id = ?
+  `;
+    return this.executaQuery(sql, [tenant_id]).then((res) => res[0].total);
+  }
 }
 
 module.exports = new MensagemProgramadaModel();

@@ -55,6 +55,24 @@ class ClienteModel {
     const sql = 'DELETE FROM clientes WHERE tenant_id = ? AND id = ?';
     return this.executaQuery(sql, [tenant_id, id]);
   }
+
+  // IA PESQUISAS
+
+  contarTotalClientes(tenant_id) {
+    const sql = `SELECT COUNT(*) as total FROM clientes WHERE tenant_id = ?`;
+    return this.executaQuery(sql, [tenant_id]).then((res) => res[0].total);
+  }
+
+  contarClientesNovosMes(tenant_id) {
+    const sql = `
+    SELECT COUNT(*) as total 
+    FROM clientes 
+    WHERE MONTH(criado_em) = MONTH(CURRENT_DATE()) 
+    AND YEAR(criado_em) = YEAR(CURRENT_DATE())
+    AND tenant_id = ?
+  `;
+    return this.executaQuery(sql, [tenant_id]).then((res) => res[0].total);
+  }
 }
 
 module.exports = new ClienteModel();

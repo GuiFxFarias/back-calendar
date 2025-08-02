@@ -1,0 +1,218 @@
+[
+  {
+    "intent": "visitas_amanha",
+    "frases": [
+      "Quais são as visitas de amanhã?",
+      "Tenho algo agendado para amanhã?",
+      "Me mostra as visitas marcadas para amanhã",
+      "Visitas previstas para o dia seguinte"
+    ]
+  },
+  {
+    "intent": "visitas_canceladas_mes",
+    "frases": [
+      "Quantas visitas foram canceladas neste mês?",
+      "Teve cancelamento recente?",
+      "Alguma visita foi cancelada em agosto?",
+      "Total de cancelamentos do mês"
+    ]
+  },
+  {
+    "intent": "visitas_pendentes",
+    "frases": [
+      "Quantas visitas ainda estão pendentes?",
+      "Mostre-me as pendências",
+      "Visitas que não foram realizadas ainda",
+      "Lista de visitas pendentes"
+    ]
+  },
+  {
+    "intent": "visitas_hoje",
+    "frases": [
+      "Quais são as visitas de hoje?",
+      "Tenho agendamento para hoje?",
+      "O que está marcado para hoje?",
+      "Visitas agendadas hoje"
+    ]
+  },
+  {
+    "intent": "visitas_realizadas_mes",
+    "frases": [
+      "Quantas visitas já foram feitas este mês?",
+      "Total de visitas concluídas no mês",
+      "Visitas realizadas até agora",
+      "Já realizamos muitas visitas esse mês?"
+    ]
+  },
+  {
+    "intent": "visitas_em_andamento",
+    "frases": [
+      "Quais visitas estão em andamento agora?",
+      "Alguma visita acontecendo neste momento?",
+      "Me mostra visitas em progresso",
+      "Existe alguém em atendimento agora?"
+    ]
+  },
+  {
+    "intent": "visitas_por_cidade",
+    "frases": [
+      "Quantas visitas por cidade?",
+      "Onde estão concentradas as visitas?",
+      "Me mostra visitas separadas por cidade",
+      "Visitas por localidade"
+    ]
+  },
+  {
+    "intent": "ultima_visita_dia",
+    "frases": [
+      "Qual é a última visita de hoje?",
+      "Quem será atendido por último hoje?",
+      "Me diga a visita final do dia",
+      "Última visita agendada"
+    ]
+  },
+  {
+    "intent": "primeira_visita_dia",
+    "frases": [
+      "Qual é a primeira visita agendada hoje?",
+      "Quem será o primeiro cliente?",
+      "Início do dia: qual a visita?",
+      "Primeira visita marcada"
+    ]
+  },
+  {
+    "intent": "total_clientes",
+    "frases": [
+      "Quantos clientes temos?",
+      "Total de cadastros no sistema",
+      "Mostre o número de clientes",
+      "Quantidade de clientes ativos"
+    ]
+  },
+  {
+    "intent": "clientes_novos_mes",
+    "frases": [
+      "Quantos clientes novos neste mês?",
+      "Teve novos cadastros recentemente?",
+      "Total de novos clientes em agosto",
+      "Quem entrou este mês?"
+    ]
+  },
+  {
+    "intent": "mensagens_programadas_hoje",
+    "frases": [
+      "Que mensagens estão agendadas para hoje?",
+      "Vamos enviar alguma mensagem hoje?",
+      "Mensagens programadas para hoje",
+      "Lista de mensagens de hoje"
+    ]
+  },
+  {
+    "intent": "mensagens_ativas",
+    "frases": [
+      "Quantas mensagens estão ativas?",
+      "Mensagens agendadas ainda válidas",
+      "Total de mensagens ativas",
+      "Alguma mensagem pendente de envio?"
+    ]
+  },
+  {
+    "intent": "valor_total_pago_mes",
+    "frases": [
+      "Quanto recebemos este mês?",
+      "Total de valor pago nas visitas",
+      "Receita do mês atual",
+      "Valor arrecadado até agora"
+    ]
+  },
+  {
+    "intent": "faturamento_a_partir",
+    "frases": [
+      "Qual foi o faturamento a partir do dia 1?",
+      "Quanto faturamos desde segunda?",
+      "Total recebido após data X",
+      "Receita parcial do mês"
+    ]
+  },
+  {
+    "intent": "visitas_pendentes_mes",
+    "frases": [
+      "Quantas visitas pendentes neste mês?",
+      "Visitas ainda não concluídas no mês",
+      "Pendências do mês atual",
+      "Me dá as pendentes de agosto"
+    ]
+  },
+  {
+    "intent": "valor_pendente_mes",
+    "frases": [
+      "Qual o valor total pendente este mês?",
+      "Quanto ainda falta receber?",
+      "Total de valores não pagos no mês",
+      "Pendências financeiras de agosto"
+    ]
+  },
+  {
+    "intent": "mensagens_programadas_mes",
+    "frases": [
+      "Quantas mensagens estão programadas para este mês?",
+      "Mensagens agendadas ao longo do mês",
+      "Alguma mensagem marcada para os próximos dias?",
+      "Comunicação agendada para este mês"
+    ]
+  },
+  {
+    "intent": "visitas_pendentes_hoje",
+    "frases": [
+      "Tenho visitas pendentes hoje?",
+      "Visitas de hoje ainda não realizadas",
+      "Quantas pendentes para hoje?",
+      "Mostre as de hoje que não foram feitas"
+    ]
+  },
+  {
+    "intent": "visita_realizadas_hoje",
+    "frases": [
+      "Quantas visitas já fizemos hoje?",
+      "Visitas concluídas no dia atual",
+      "Realizadas até o momento",
+      "Já atendemos alguém hoje?"
+    ]
+  },
+  {
+    "intent": "valor_pendente_hoje",
+    "frases": [
+      "Quanto ainda falta receber hoje?",
+      "Valor pendente do dia atual",
+      "Alguma visita de hoje não foi paga?",
+      "Total a receber do dia"
+    ]
+  },
+  {
+    "intent": "valor_do_dia",
+    "frases": [
+      "Quanto já recebemos hoje?",
+      "Faturamento diário",
+      "Valor total pago nas visitas de hoje",
+      "Receita de hoje"
+    ]
+  },
+  {
+    "intent": "visitas_realizadas_no_dia_mes",
+    "frases": [
+      "Visitas realizadas em um dia específico do mês?",
+      "Quantas foram feitas no dia 10?",
+      "Relatório de visitas realizadas dia 02/08",
+      "Ver visitas concluídas por data"
+    ]
+  },
+  {
+    "intent": "visitas_pendentes_no_dia_mes",
+    "frases": [
+      "Visitas pendentes para o dia 15/08?",
+      "Alguma pendente em uma data específica?",
+      "Quero ver as pendências do dia 10",
+      "Mostre visitas não feitas dia 02"
+    ]
+  }
+]

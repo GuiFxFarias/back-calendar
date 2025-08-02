@@ -68,6 +68,18 @@ class PagamentoModel {
     const agora = new Date();
     return agora <= expiracaoGratuita;
   }
+
+  // IA PESQUISAS
+  totalFaturadoMes(tenant_id) {
+    const sql = `
+    SELECT SUM(valor) as total 
+    FROM pagamentos 
+    WHERE MONTH(criado_em) = MONTH(CURRENT_DATE())
+    AND YEAR(criado_em) = YEAR(CURRENT_DATE())
+    AND tenant_id = ?
+  `;
+    return this.executaQuery(sql, [tenant_id]).then((res) => res[0].total || 0);
+  }
 }
 
 module.exports = new PagamentoModel();
