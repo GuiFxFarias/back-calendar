@@ -148,7 +148,7 @@ class UserController {
 
       await userModel.salvarTokenRecuperacao(email, token, expira);
 
-      const link = `http://localhost:3000/redefinir-senha?token=${token}`;
+      const link = `http://www.gcalendar.com.br/redefinir-senha?token=${token}`;
       const html = `
       <p>Olá,</p>
       <p>Você solicitou a redefinição da sua senha. Clique no link abaixo para criar uma nova senha:</p>
