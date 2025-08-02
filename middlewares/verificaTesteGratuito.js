@@ -1,7 +1,7 @@
 const pagamentoModel = require('../models/pagamentoModel');
 
 async function verificaAcessoLiberado(usuario) {
-  const DIAS_TOLERANCIA = 7;
+  const DIAS_TOLERANCIA = 30;
   const hoje = new Date();
 
   // 1. Verifica se ainda está no teste gratuito
