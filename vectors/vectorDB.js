@@ -1,55 +1,44 @@
-const sqlite3 = require('sqlite3').verbose();
+const Database = require('better-sqlite3');
 const path = require('path');
 
 class VectorDB {
   constructor() {
     this.dbPath = path.join(__dirname, '../database/vetores.db');
-    this.db = new sqlite3.Database(this.dbPath);
+    this.db = new Database(this.dbPath);
 
-    this.db.run(
-      `CREATE TABLE IF NOT EXISTS documentos (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        texto TEXT,
-        embedding TEXT
-      )`
-    );
+    this.db
+      .prepare(
+        `CREATE TABLE IF NOT EXISTS documentos (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          texto TEXT,
+          embedding TEXT
+        )`
+      )
+      .run();
   }
 
   limparTodosOsVetores() {
-    return new Promise((resolve, reject) => {
-      const sql = `DELETE FROM documentos`;
-      this.db.run(sql, function (err) {
-        if (err) reject(err);
-        else resolve(true);
-      });
-    });
+    const stmt = this.db.prepare(`DELETE FROM documentos`);
+    stmt.run();
+    return true;
   }
 
   inserirDocumento(texto, embedding) {
-    return new Promise((resolve, reject) => {
-      const embeddingStr = JSON.stringify(embedding);
-      this.db.run(
-        `INSERT INTO documentos (texto, embedding) VALUES (?, ?)`,
-        [texto, embeddingStr],
-        function (err) {
-          if (err) reject(err);
-          else resolve(this.lastID);
-        }
-      );
-    });
+    const embeddingStr = JSON.stringify(embedding);
+    const stmt = this.db.prepare(
+      `INSERT INTO documentos (texto, embedding) VALUES (?, ?)`
+    );
+    const info = stmt.run(texto, embeddingStr);
+    return info.lastInsertRowid;
   }
 
   buscarTodos() {
-    return new Promise((resolve, reject) => {
-      this.db.all(`SELECT * FROM documentos`, [], (err, rows) => {
-        if (err) reject(err);
-        else resolve(rows);
-      });
-    });
+    const stmt = this.db.prepare(`SELECT * FROM documentos`);
+    return stmt.all();
   }
 
-  async buscarMaisSimilar(embeddingConsulta) {
-    const documentos = await this.buscarTodos();
+  buscarMaisSimilar(embeddingConsulta) {
+    const documentos = this.buscarTodos();
 
     const calcularSimilaridade = (a, b) => {
       if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) {
