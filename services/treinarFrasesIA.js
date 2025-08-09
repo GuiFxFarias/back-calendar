@@ -1,5 +1,6 @@
-const fs = require('fs');
 const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
+const fs = require('fs');
 const vetorDB = require('../vectors/vectorDB');
 const embeddingService = require('../services/embeddingService');
 
@@ -13,10 +14,12 @@ async function treinarFrasesIA() {
 
   const intents = JSON.parse(fs.readFileSync(arquivo, 'utf-8'));
 
-  const existentes = await vetorDB.buscarTodos();
-  const jaVetorizadas = new Set(
-    existentes.map((v) => `${v.texto}|${v.embedding.length}`)
-  );
+  // 🔍 Busca todos os textos existentes no banco
+  const existentes = await vetorDB.buscarTodos(); // [{ id, texto, embedding }]
+  const textosVetorizados = new Set(existentes.map((v) => v.texto));
+
+  // 🔧 Frases do JSON (para futura comparação)
+  const novasFrases = new Set();
 
   for (const item of intents) {
     const { intent, frases } = item;
@@ -32,10 +35,10 @@ async function treinarFrasesIA() {
         continue;
       }
 
-      const texto = `frase::${intent}`;
-      const chave = `${texto}|${frase.length}`;
+      const texto = `frase::${intent}::${frase}`;
+      novasFrases.add(texto);
 
-      if (jaVetorizadas.has(chave)) {
+      if (textosVetorizados.has(texto)) {
         console.log(`⏩ Já vetorizada: ${frase}`);
         continue;
       }
@@ -43,14 +46,26 @@ async function treinarFrasesIA() {
       try {
         const embedding = await embeddingService.gerarEmbedding(frase);
         await vetorDB.inserirDocumento(texto, embedding);
-        console.log(`✅ Vetorizado: ${texto} -> ${frase}`);
+        console.log(`✅ Vetorizado: ${texto}`);
       } catch (err) {
         console.error(`❌ Erro ao vetorizar frase: "${frase}"`, err);
       }
     }
   }
 
-  console.log('🎯 Treinamento finalizado!');
+  // 🧹 Verifica e remove frases que não existem mais no JSON
+  for (const existente of existentes) {
+    if (!novasFrases.has(existente.texto)) {
+      try {
+        await vetorDB.excluirPorTexto(existente.texto);
+        console.log(`🗑️ Removido do banco: ${existente.texto}`);
+      } catch (err) {
+        console.error(`❌ Erro ao remover "${existente.texto}":`, err);
+      }
+    }
+  }
+
+  console.log('🎯 Treinamento finalizado e sincronizado!');
 }
 
 treinarFrasesIA();

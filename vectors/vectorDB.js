@@ -1,3 +1,4 @@
+require('dotenv').config();
 const conexao = require('../conexao');
 
 class VectorDB {
@@ -38,6 +39,11 @@ class VectorDB {
   buscarTodos() {
     const sql = `SELECT * FROM documentos`;
     return this.executaQuery(sql);
+  }
+
+  excluirPorTexto(texto) {
+    const sql = `DELETE FROM documentos WHERE texto = ?`;
+    return this.executaQuery(sql, [texto]);
   }
 
   async buscarMaisSimilar(embeddingConsulta) {

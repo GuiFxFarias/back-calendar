@@ -91,166 +91,66 @@ class VisitaModel {
 
   // IA PESQUISAS
 
-  buscarVisitasAmanha(tenant_id) {
+  // Eventos pendentes
+  // Contagem de visitas pendentes
+  contarVisitasPendentesHoje(tenant_id, dia, mes, ano) {
     const sql = `
-      SELECT descricao, data_visita 
-      FROM visitas 
-      WHERE DATE(data_visita) = CURDATE() + INTERVAL 1 DAY
+    SELECT COUNT(*) as total
+    FROM visitas
+    WHERE status = 'pendente_visita'
+      AND DAY(data_visita) = ?
+      AND MONTH(data_visita) = ?
+      AND YEAR(data_visita) = ?
       AND tenant_id = ?
-    `;
-    return this.executaQuery(sql, [tenant_id]);
-  }
-
-  contarCanceladasMes(tenant_id) {
-    const sql = `
-      SELECT COUNT(*) as total 
-      FROM visitas 
-      WHERE status = 'cancelado' 
-      AND MONTH(data_visita) = MONTH(CURDATE()) 
-      AND YEAR(data_visita) = YEAR(CURDATE())
-      AND tenant_id = ?
-    `;
-    return this.executaQuery(sql, [tenant_id]).then((res) => res[0].total);
-  }
-
-  contarVisitasPendentes(tenant_id) {
-    const sql = `
-    SELECT COUNT(*) as total 
-    FROM visitas 
-    WHERE status = 'pendente_visita' 
-    AND tenant_id = ?
   `;
-    return this.executaQuery(sql, [tenant_id]).then((res) => res[0].total);
+    return this.executaQuery(sql, [dia, mes, ano, tenant_id]).then(
+      (res) => res[0].total
+    );
   }
-
-  somarValorPagoMes(tenant_id) {
-    const sql = `
-      SELECT SUM(preco) as total 
-      FROM visitas 
-      WHERE status = 'pago' 
-      AND MONTH(data_visita) = MONTH(CURDATE()) 
-      AND YEAR(data_visita) = YEAR(CURDATE())
-      AND tenant_id = ?
-    `;
-    return this.executaQuery(sql, [tenant_id]).then((res) => res[0].total || 0);
-  }
-
-  contarVisitasHoje(tenant_id) {
-    const sql = `
-    SELECT COUNT(*) as total 
-    FROM visitas 
-    WHERE DATE(data_visita) = CURDATE() 
-    AND tenant_id = ?
-  `;
-    return this.executaQuery(sql, [tenant_id]).then((res) => res[0].total);
-  }
-
-  buscarVisitasHojeDetalhado(tenant_id) {
+  // Detalhe das visitas pendentes hoje
+  detalheVisitasPendentesHoje(tenant_id, dia, mes, ano) {
     const sql = `
     SELECT 
       v.id,
-      v.descricao,
+      c.nome AS cliente,
       v.data_visita,
-      v.status,
-      c.nome AS nome_cliente,
-      c.telefone,
-      c.email
+      v.preco,
+      v.descricao
     FROM visitas v
-    LEFT JOIN clientes c ON v.cliente_id = c.id
-    WHERE DATE(v.data_visita) = CURDATE()
+    LEFT JOIN clientes c ON c.id = v.cliente_id
+    WHERE v.status = 'pendente_visita'
+      AND DAY(v.data_visita) = ?
+      AND MONTH(v.data_visita) = ?
+      AND YEAR(v.data_visita) = ?
       AND v.tenant_id = ?
     ORDER BY v.data_visita ASC
   `;
-    return this.executaQuery(sql, [tenant_id]);
+    return this.executaQuery(sql, [dia, mes, ano, tenant_id]);
   }
-
-  buscarPrimeiraVisita(tenant_id) {
+  // Detalhe das visitas pagas hoje
+  detalheVisitasPagasHoje(tenant_id, dia, mes, ano) {
     const sql = `
     SELECT 
-      c.nome AS nome_cliente, 
-      TIME(v.data_visita) AS horario 
+      v.id,
+      c.nome AS cliente,
+      v.data_visita,
+      v.preco,
+      v.descricao
     FROM visitas v
-    LEFT JOIN clientes c ON v.cliente_id = c.id
-    WHERE DATE(v.data_visita) = CURDATE() 
-      AND v.tenant_id = ? 
-    ORDER BY v.data_visita ASC 
-    LIMIT 1`;
-    return this.executaQuery(sql, [tenant_id]).then((res) => res[0]);
-  }
-
-  buscarUltimaVisita(tenant_id) {
-    const sql = `
-    SELECT 
-  c.nome AS nome_cliente, 
-  TIME(v.data_visita) AS horario 
-FROM visitas v
-LEFT JOIN clientes c ON v.cliente_id = c.id
-WHERE DATE(v.data_visita) = CURDATE() 
-  AND v.tenant_id = ? 
-ORDER BY v.data_visita DESC 
-LIMIT 1`;
-    return this.executaQuery(sql, [tenant_id]).then((res) => res[0]);
-  }
-
-  contarVisitasRealizadasMes(tenant_id) {
-    const sql = `
-    SELECT COUNT(*) as total 
-    FROM visitas 
-    WHERE status = 'pago' 
-    AND MONTH(data_visita) = MONTH(CURRENT_DATE())
-    AND YEAR(data_visita) = YEAR(CURRENT_DATE())
-    AND tenant_id = ?
+    LEFT JOIN clientes c ON c.id = v.cliente_id
+    WHERE v.status = 'pago'
+      AND DAY(v.data_visita) = ?
+      AND MONTH(v.data_visita) = ?
+      AND YEAR(v.data_visita) = ?
+      AND v.tenant_id = ?
+    ORDER BY v.data_visita ASC
   `;
-    return this.executaQuery(sql, [tenant_id]).then((res) => res[0].total);
+    return this.executaQuery(sql, [dia, mes, ano, tenant_id]);
   }
 
-  contarVisitasEmAndamento(tenant_id) {
-    const sql = `
-    SELECT COUNT(*) as total 
-    FROM visitas 
-    WHERE status = 'pendente_visita' 
-    AND tenant_id = ?
-  `;
-    return this.executaQuery(sql, [tenant_id]).then((res) => res[0].total);
-  }
-
-  contarVisitasPorCidade(tenant_id) {
-    const sql = `
-    SELECT cidade, COUNT(*) as total 
-    FROM visitas 
-    WHERE tenant_id = ? 
-    GROUP BY cidade
-  `;
-    return this.executaQuery(sql, [tenant_id]);
-  }
-
-  contarVisitasPendentesMes(tenant_id) {
-    const sql = `
-    SELECT COUNT(*) as total
-    FROM visitas
-    WHERE status = 'pendente_visita'
-      AND MONTH(data_visita) = MONTH(CURDATE())
-      AND YEAR(data_visita) = YEAR(CURDATE())
-      AND tenant_id = ?
-  `;
-    return this.executaQuery(sql, [tenant_id]).then((res) => res[0].total);
-  }
-
-  somarValorPendenteMes(tenant_id) {
-    const sql = `
-    SELECT SUM(preco) as total
-    FROM visitas
-    WHERE status = 'pendente_visita'
-      AND MONTH(data_visita) = MONTH(CURDATE())
-      AND YEAR(data_visita) = YEAR(CURDATE())
-      AND tenant_id = ?
-  `;
-    return this.executaQuery(sql, [tenant_id]).then(
-      (res) => Number(res[0].total) || 0
-    );
-  }
-
-  contarVisitasRealizadasNoDia(tenant_id, dia, mes, ano) {
+  // Eventos pagos
+  // Contagem de visitas pagas
+  contarVisitasPagasHoje(tenant_id, dia, mes, ano) {
     const sql = `
     SELECT COUNT(*) as total
     FROM visitas
@@ -264,12 +164,13 @@ LIMIT 1`;
       (res) => res[0].total
     );
   }
-
-  contarVisitasPendentesNoDia(tenant_id, dia, mes, ano) {
+  // Eventos pendente_recebimento
+  // Contagem de visitas pendente_recebimento
+  contarVisitasPendenteRecebimentoHoje(tenant_id, dia, mes, ano) {
     const sql = `
     SELECT COUNT(*) as total
     FROM visitas
-    WHERE status = 'pendente_visita'
+    WHERE status = 'pendente_recebimento'
       AND DAY(data_visita) = ?
       AND MONTH(data_visita) = ?
       AND YEAR(data_visita) = ?
@@ -277,32 +178,6 @@ LIMIT 1`;
   `;
     return this.executaQuery(sql, [dia, mes, ano, tenant_id]).then(
       (res) => res[0].total
-    );
-  }
-
-  somarValorPendenteHoje(tenant_id) {
-    const sql = `
-    SELECT SUM(preco) as total
-    FROM visitas
-    WHERE status = 'pendente_visita'
-      AND DATE(data_visita) = CURDATE()
-      AND tenant_id = ?
-  `;
-    return this.executaQuery(sql, [tenant_id]).then(
-      (res) => Number(res[0].total) || 0
-    );
-  }
-
-  somarValorPagoHoje(tenant_id) {
-    const sql = `
-    SELECT SUM(preco) as total
-    FROM visitas
-    WHERE status = 'pago'
-      AND DATE(data_visita) = CURDATE()
-      AND tenant_id = ?
-  `;
-    return this.executaQuery(sql, [tenant_id]).then(
-      (res) => Number(res[0].total) || 0
     );
   }
 }
