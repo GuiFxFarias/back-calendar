@@ -13,15 +13,19 @@ class AnexoModel {
     });
   }
 
-  criarAnexo({ visita_id = null, cliente_id, arquivo_url, tipo }, tenant_id) {
+  criarAnexo(
+    { visita_id = null, cliente_id, arquivo_url, nome_original, tipo },
+    tenant_id
+  ) {
     const sql = `
-    INSERT INTO anexos (visita_id, cliente_id, arquivo_url, tipo, tenant_id)
-    VALUES (?, ?, ?, ?, ?)
-  `;
+      INSERT INTO anexos (visita_id, cliente_id, arquivo_url, nome_original, tipo, tenant_id)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `;
     return this.executaQuery(sql, [
       visita_id,
       cliente_id,
       arquivo_url,
+      nome_original, // novo campo
       tipo,
       tenant_id,
     ]);
@@ -29,17 +33,22 @@ class AnexoModel {
 
   buscarPorCliente(cliente_id, tenant_id) {
     const sql = `
-    SELECT * FROM anexos
-    WHERE cliente_id = ? AND tenant_id = ?
-    ORDER BY id DESC
-  `;
+      SELECT id, visita_id, cliente_id, arquivo_url, nome_original, tipo, criado_em, tenant_id
+      FROM anexos
+      WHERE cliente_id = ? AND tenant_id = ?
+      ORDER BY id DESC
+    `;
     return this.executaQuery(sql, [cliente_id, tenant_id]);
   }
 
   buscarPorVisita(visita_id, tenant_id) {
-    const sql =
-      'SELECT * FROM anexos WHERE tenant_id = ? AND visita_id = ? ORDER BY criado_em ASC';
-    return this.executaQuery(sql, [visita_id, tenant_id]);
+    const sql = `
+      SELECT id, visita_id, cliente_id, arquivo_url, nome_original, tipo, criado_em, tenant_id
+      FROM anexos
+      WHERE tenant_id = ? AND visita_id = ?
+      ORDER BY criado_em ASC
+    `;
+    return this.executaQuery(sql, [tenant_id, visita_id]);
   }
 
   deletar(id, tenant_id) {

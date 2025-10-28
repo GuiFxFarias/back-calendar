@@ -1,0 +1,301 @@
+'use client';
+
+import { IProjetoListForComboBox } from '@/lib/interfaces/filter/filtersResponse';
+import IUser from '@/lib/interfaces/user';
+import clsx from 'clsx';
+import { useEffect, useMemo, useState } from 'react';
+import { Check, Copy, Filter, Link2, Search, Users } from 'lucide-react';
+
+import { FormCadastrarUsuario } from '../app/(app)/gerenciar/formCadastrarUsuario';
+import { FormDesativarUsuario } from '../app/(app)/gerenciar/formDesativarUsuario';
+import { FormEditarUsuario } from '../app/(app)/gerenciar/formEditarUsuario';
+
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import { Button } from './ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
+import { Input } from './ui/input';
+import { ToggleGroup, ToggleGroupItem } from './ui/toggle-group';
+import { Switch } from 'antd';
+
+// ————————————————————————————————————————————————————————————
+// Tipagens
+// ————————————————————————————————————————————————————————————
+type GerenciarPageProps = {
+  users: IUser[];
+  isUserRole: { supervisor: boolean; gestor: boolean; colaborador: boolean };
+  projetos?: IProjetoListForComboBox[];
+};
+
+// ————————————————————————————————————————————————————————————
+// Helpers
+// ————————————————————————————————————————————————————————————
+const normalize = (v: string) =>
+  v
+    ?.toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+
+const getInitials = (fullName: string) =>
+  fullName
+    .split(' ')
+    .slice(0, 2)
+    .map((s) => s.charAt(0))
+    .join('');
+
+// ————————————————————————————————————————————————————————————
+// Componente de Linha de Usuário (compacto)
+// ————————————————————————————————————————————————————————————
+function UserRow({
+  user,
+  isGestor,
+  onEdit,
+  onDeactivate,
+}: {
+  user: IUser;
+  isGestor: boolean;
+  onEdit: (u: IUser) => JSX.Element;
+  onDeactivate: (u: IUser) => JSX.Element;
+}) {
+  return (
+    <li
+      key={user.id}
+      className="group grid grid-cols-[1fr_1fr_auto] items-center gap-3 rounded-xl border border-zinc-200 bg-white/70 p-3 shadow-sm transition hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900/70">
+      <div className="flex min-w-0 items-center gap-3">
+        <Avatar className="size-9">
+          <AvatarImage src={user?.fotoPerfil && `${process.env.NEXT_PUBLIC_API_URL}/files/${user?.fotoPerfil}`} />
+          <AvatarFallback>{getInitials(user.nome)}</AvatarFallback>
+        </Avatar>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-medium">{user.nome}</p>
+          <p className="truncate text-xs text-zinc-500" title={user.email}>
+            {user.email}
+          </p>
+        </div>
+      </div>
+
+      <div className="hidden min-w-0 justify-self-start sm:block">
+        {isGestor ? (
+          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/40 dark:text-amber-100">Vendedor</span>
+        ) : (
+          <div className="flex flex-wrap gap-1">
+            {user.roles?.map((role, i) => (
+              <span
+                key={`${role}-${i}`}
+                className="truncate rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+                {role}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="flex items-center justify-end gap-2">
+        {onEdit(user)}
+        {onDeactivate(user)}
+      </div>
+    </li>
+  );
+}
+
+// ————————————————————————————————————————————————————————————
+// Página principal – versão compacta
+// ————————————————————————————————————————————————————————————
+export default function GerenciarPage({ users, isUserRole, projetos }: Readonly<GerenciarPageProps>) {
+  const [query, setQuery] = useState('');
+  const [selectedRole, setSelectedRole] = useState('');
+  const [showOnlyInactive, setShowOnlyInactive] = useState(false);
+
+  // Invite link state
+  const [copiado, setCopiado] = useState(false);
+  const [link, setLink] = useState('');
+  const [erroGerarLink, setErroGerarLink] = useState(false);
+  const [isLoadingLink, setIsLoadingLink] = useState(false);
+
+  // Filtro memoizado
+  const filteredUsers = useMemo(() => {
+    const q = normalize(query || '');
+
+    return users
+      .filter((u) => (q ? normalize(u.nome).includes(q) || normalize(u.email || '').includes(q) : true))
+      .filter((u) => (selectedRole ? (u.roles || []).map((r) => normalize(r)).join(',').includes(selectedRole) : true))
+      .filter((u) => (showOnlyInactive ? !u.isActive : true));
+  }, [users, query, selectedRole, showOnlyInactive]);
+
+  // Geração de link (com cache de 4h no localStorage)
+  const gerarLink = async () => {
+    setIsLoadingLink(true);
+    setCopiado(false);
+    try {
+      const saved = localStorage.getItem('linkCadastro');
+      if (saved) {
+        const { link: savedLink, timestamp } = JSON.parse(saved);
+        if (Date.now() - timestamp < 4 * 60 * 60 * 1000) {
+          setLink(savedLink);
+          return;
+        }
+      }
+
+      await new Promise((r) => setTimeout(r, 500));
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/onboarding/codigo`, { method: 'POST' });
+      if (!res.ok) throw new Error('Erro na resposta da API');
+      const data = await res.json();
+      const linkGerado = `${window.location.origin}/onboarding/${data.codigo}`;
+      setLink(linkGerado);
+      localStorage.setItem('linkCadastro', JSON.stringify({ link: linkGerado, timestamp: Date.now() }));
+    } catch (e) {
+      console.error('Erro ao gerar link:', e);
+      setErroGerarLink(true);
+    } finally {
+      setIsLoadingLink(false);
+    }
+  };
+
+  const copiarLink = () => {
+    if (!link) return;
+    navigator.clipboard.writeText(link);
+    setCopiado(true);
+    setTimeout(() => setCopiado(false), 1500);
+  };
+
+  // ——————————————————————————————————————————————
+  // UI
+  // ——————————————————————————————————————————————
+  return (
+    <div className="flex h-full flex-col">
+      {/* Topbar fixa com busca e ações */}
+      <div className="sticky top-0 z-10 border-b border-zinc-200 bg-white/75 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:border-zinc-800 dark:bg-zinc-900/60">
+        <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3">
+          <div className="flex items-center gap-2 text-sm font-semibold">
+            <Users className="size-4" />
+            Gerenciar Usuários
+          </div>
+
+          <div className="ml-auto flex w-full max-w-xl items-center gap-2">
+            <div className="relative w-full">
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
+              <Input
+                autoFocus
+                type="search"
+                placeholder="Pesquisar por nome ou e-mail..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="w-full rounded-2xl pl-9"
+              />
+            </div>
+
+            <FormCadastrarUsuario isUserRole={isUserRole} projetos={projetos} />
+
+            {(isUserRole.supervisor || isUserRole.colaborador) && (
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="secondary" className="whitespace-nowrap" onClick={gerarLink}>
+                    <Link2 className="mr-1 size-4" /> Gerar link
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Link de cadastro</DialogTitle>
+                    <DialogDescription>Envie este link para a pessoa realizar o cadastro</DialogDescription>
+                  </DialogHeader>
+                  <div className="flex items-center gap-2">
+                    <Input value={link} readOnly placeholder={isLoadingLink ? 'Gerando link...' : ''} />
+                    <Button onClick={copiarLink} disabled={isLoadingLink || !link}>
+                      {isLoadingLink ? (
+                        <svg className="mr-2 size-4 animate-spin" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" fill="currentColor" />
+                        </svg>
+                      ) : copiado ? (
+                        <Check className="mr-2 size-4" />
+                      ) : (
+                        <Copy className="mr-2 size-4" />
+                      )}
+                      {isLoadingLink ? 'Gerando' : copiado ? 'Copiado!' : 'Copiar'}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Filtros rápidos */}
+      <div className="border-b border-zinc-200 bg-white/50 px-4 py-2 dark:border-zinc-800 dark:bg-zinc-900/40">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2 text-sm text-zinc-500">
+            <Filter className="size-4" /> Filtros
+          </div>
+
+          <ToggleGroup
+            type="single"
+            value={selectedRole}
+            onValueChange={(v: string) => setSelectedRole((prev) => (v === prev ? '' : v))}
+            className="flex flex-wrap gap-1"
+          >
+            {['supervisor', 'financeiro', 'colaborador', 'gestor', 'vendedor'].map((role) => (
+              <ToggleGroupItem
+                key={role}
+                value={role}
+                className={clsx(
+                  'h-7 rounded-full px-3 text-xs',
+                  selectedRole === role ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900' : 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300'
+                )}
+              >
+                {role.charAt(0).toUpperCase() + role.slice(1)}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+
+          {!isUserRole.gestor && (
+            <div className="ml-auto flex items-center gap-2">
+              <span className="text-xs text-zinc-500">Mostrar inativos</span>
+              <Switch
+                className="bg-zinc-700 text-zinc-900 hover:text-black"
+                checkedChildren="Inativos"
+                unCheckedChildren="Todas"
+                onChange={(checked: boolean) => setShowOnlyInactive(checked)}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Lista de usuários */}
+      <div className="mx-auto w-full max-w-7xl flex-1 overflow-y-auto p-4">
+        {filteredUsers.length === 0 ? (
+          <div className="mt-10 rounded-xl border border-dashed border-zinc-300 p-8 text-center text-sm text-zinc-500 dark:border-zinc-700">
+            Nenhum usuário encontrado com os filtros atuais.
+          </div>
+        ) : (
+          <ul className="grid gap-2">
+            {filteredUsers.map((user) => (
+              <UserRow
+                key={user.id}
+                user={user}
+                isGestor={isUserRole.gestor}
+                onEdit={(u) => <FormEditarUsuario user={u} isUserRole={isUserRole} projetos={projetos} />}
+                onDeactivate={(u) => <FormDesativarUsuario user={u} isUserRole={isUserRole} />}
+              />
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {/* Dialog de erro ao gerar link */}
+      <Dialog open={erroGerarLink} onOpenChange={setErroGerarLink}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Erro ao gerar link</DialogTitle>
+            <DialogDescription>
+              Ocorreu um erro ao tentar gerar o link de cadastro. Por favor, tente novamente mais tarde.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => setErroGerarLink(false)}>Fechar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

@@ -4,7 +4,8 @@ const path = require('path');
 class AnexoController {
   async criar(req, res) {
     try {
-      const { visita_id, cliente_id, arquivo_url, tipo } = req.body;
+      const { visita_id, cliente_id, arquivo_url, nome_original, tipo } =
+        req.body;
 
       if (!arquivo_url || (!visita_id && !cliente_id)) {
         return res
@@ -17,6 +18,7 @@ class AnexoController {
           visita_id,
           cliente_id,
           arquivo_url,
+          nome_original: nome_original || null, // ✅ novo campo
           tipo: tipo || 'outro',
         },
         req.tenantId
@@ -47,9 +49,10 @@ class AnexoController {
         await anexoModel.criarAnexo(
           {
             cliente_id,
-            arquivo_url,
-            tipo,
             visita_id: null,
+            arquivo_url,
+            nome_original: file.originalname, // ✅ salva o nome real
+            tipo,
           },
           req.tenantId
         );
@@ -65,8 +68,7 @@ class AnexoController {
   async listarPorVisita(req, res) {
     try {
       const { visita_id } = req.params;
-
-      const anexos = await anexoModel.buscarPorVisita(visita_id, req.tenantId); // ✅ passa tenant
+      const anexos = await anexoModel.buscarPorVisita(visita_id, req.tenantId);
       res.status(200).json(anexos);
     } catch (error) {
       console.error('Erro ao buscar anexos:', error);
@@ -77,7 +79,6 @@ class AnexoController {
   async listarPorCliente(req, res) {
     try {
       const { id } = req.params;
-
       const anexos = await anexoModel.buscarPorCliente(id, req.tenantId);
       res.status(200).json(anexos);
     } catch (error) {
@@ -99,16 +100,28 @@ class AnexoController {
     }
   }
 
+  // /anexos/download/:nome  (onde :nome é o filename salvo)
   async baixar(req, res) {
-    const nomeArquivo = req.params.nome;
-    const filePath = path.join(process.cwd(), 'uploads', nomeArquivo);
+    try {
+      const nomeArquivo = req.params.nome;
+      const filePath = path.join(process.cwd(), 'uploads', nomeArquivo);
 
-    res.download(filePath, nomeArquivo, (err) => {
-      if (err) {
-        console.error('Erro ao baixar:', err);
-        res.status(500).json({ erro: 'Erro ao fazer download do arquivo.' });
-      }
-    });
+      // ✅ tenta achar o original no banco para renomear o download
+      const arquivo_url = `/uploads/${nomeArquivo}`;
+      const anexo = await anexoModel.buscarPorUrl(arquivo_url, req.tenantId); // precisa do método no model (abaixo)
+
+      const downloadName = anexo?.nome_original || nomeArquivo;
+
+      res.download(filePath, downloadName, (err) => {
+        if (err) {
+          console.error('Erro ao baixar:', err);
+          res.status(500).json({ erro: 'Erro ao fazer download do arquivo.' });
+        }
+      });
+    } catch (err) {
+      console.error('Erro no download:', err);
+      res.status(500).json({ erro: 'Erro ao fazer download do arquivo.' });
+    }
   }
 }
 

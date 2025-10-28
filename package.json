@@ -24,6 +24,7 @@
     "node-cron": "^4.1.0",
     "nodemailer": "^7.0.5",
     "openai": "^5.11.0",
+    "rrule": "^2.8.1",
     "stripe": "^18.3.0",
     "twilio": "^5.7.1"
   },

@@ -1,0 +1,324 @@
+'use client';
+
+import Link from 'next/link';
+import { Loader2, Search, CalendarClock, BadgeCheck, BadgeX, Plus, Filter } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { getCookie } from 'cookies-next';
+import { FormCadastrarAcademia } from './formCadastrarAcademia';
+import { Separator } from '../../../components/ui/separator';
+import IEmpresa from '../../../lib/interfaces/empresa/empresa';
+import { TipoProduto, TipoProdutoLabel } from '@/lib/enums/tipoProduto';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { Space, Switch } from 'antd';
+import { Combobox } from '@/components/combobox';
+import AcademiaPanel from './academiaPanel';
+import clsx from 'clsx';
+
+// ———————————————————————————————————————————————————————
+// ChipButton – botão compacto e clean para filtros
+// ———————————————————————————————————————————————————————
+function ChipButton({ active, onClick, children }: { active?: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <Button
+      type="button"
+      variant={active ? 'default' : 'outline'}
+      size="sm"
+      onClick={onClick}
+      className={clsx(
+        'h-7 rounded-full px-3 text-xs transition',
+        !active && 'bg-transparent hover:bg-zinc-100 dark:hover:bg-zinc-800'
+      )}
+    >
+      {children}
+    </Button>
+  );
+}
+
+export default function Academias() {
+  const [loading, setLoading] = useState<boolean>(true);
+  const [empresas, setEmpresas] = useState<IEmpresa[]>([]);
+  const [selectedEmpresa, setSelectedEmpresa] = useState<IEmpresa>({
+    idDono: '',
+    dono: undefined,
+    nome: '',
+    cnpj: '',
+    email: '',
+    imagemLogo: '',
+    telefone: '',
+    cep: '',
+    logradouro: '',
+    numero: '',
+    complemento: '',
+    bairro: '',
+    cidade: '',
+    uf: '',
+    localizacao: '',
+    id: '',
+    dateCreated: '',
+    dateUpdated: '',
+    produtos: [],
+    dataFim: new Date(),
+    seloIndicacao: false,
+    instagram: '',
+  });
+  const [loadingSpinMobile, setLoadingSpinMobile] = useState(false);
+  const [query, setQuery] = useState('');
+  const [filtros, setFiltros] = useState({
+    produto: null as string | null,
+    ativos: null as boolean | null,
+    seloIndicacao: null as boolean | null,
+    tagRestricao: null as boolean | null,
+    diasVencimento: null as boolean | null,
+    vencidos: null as boolean | null,
+  });
+
+  const tipoProdutoItems = Object.values(TipoProduto)
+    .filter((value) => typeof value === 'number')
+    .map((value) => {
+      const numericValue = value as TipoProduto;
+      return { value: numericValue.toString(), label: TipoProdutoLabel(numericValue).toString() };
+    });
+
+  // Normalização para busca
+  const normalize = (v: string) => v?.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+  // Filtro memoizado – elimina setFilteredEmpresas extra
+  const filteredEmpresas = useMemo(() => {
+    let result = empresas;
+
+    // Busca por nome
+    if (query) {
+      const q = normalize(query);
+      result = result.filter((e) => normalize(e.nome).includes(q));
+    }
+
+    // Produto
+    if (filtros.produto) {
+      result = result.filter((empresa) => empresa.produtos?.some((p) => p.tipoProduto.toString() === filtros.produto));
+    }
+
+    // Ativos
+    if (filtros.ativos !== null) {
+      result = result.filter((empresa) => (filtros.ativos ? !empresa.dateDeleted : true));
+    }
+
+    // Selo indicação
+    if (filtros.seloIndicacao) result = result.filter((e) => e.seloIndicacao);
+
+    // Tag restrição
+    if (filtros.tagRestricao) result = result.filter((e) => e.dono?.tagRestricao);
+
+    // 30 dias de vencimento
+    if (filtros.diasVencimento) {
+      const hoje = new Date();
+      result = result.filter((e) => {
+        if (!e.dataFim) return false;
+        const diffDays = Math.abs(new Date(e.dataFim).getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24);
+        return diffDays < 30;
+      });
+    }
+
+    // Vencidos
+    if (filtros.vencidos) {
+      const hoje = new Date();
+      result = result.filter((e) => (e.dataFim ? new Date(e.dataFim) < hoje : false));
+    }
+
+    return result;
+  }, [empresas, filtros, query]);
+
+  useEffect(() => {
+    async function getEmpresas() {
+      try {
+        const token = getCookie('token');
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/empresas`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        setEmpresas(data.value as IEmpresa[]);
+      } catch (error) {
+        console.error('Failed to fetch empresas:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    getEmpresas();
+  }, []);
+
+  const getCorCalendario = (dataFim: string | Date) => {
+    const hoje = new Date();
+    const dataFinal = new Date(dataFim);
+    const diferencaEmDias = Math.ceil((dataFinal.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24));
+    if (diferencaEmDias < 0) return 'text-red-500';
+    if (diferencaEmDias <= 30) return 'text-orange-500';
+    return 'text-green-500';
+  };
+
+  return (
+    <div className="flex flex-row">
+      <div className="h-screen w-full bg-fundo-claro-3 py-6 dark:bg-fundo-dark dark:text-zinc-700">
+        <div className="mx-auto flex h-full w-[min(1100px,90vw)] flex-col rounded-3xl bg-fundo-claro px-6 py-6 dark:bg-fundo-escuro">
+          {/* Topbar */}
+          <div className="flex items-center gap-3">
+            <div className="relative flex-1">
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
+              <Input
+                placeholder="Pesquisar academia"
+                className="w-full rounded-2xl pl-9"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+            </div>
+            <FormCadastrarAcademia />
+          </div>
+
+          {/* Filtros */}
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
+            <div className="inline-flex items-center gap-1 text-zinc-500"><Filter className="size-4" />FILTROS</div>
+            <Space direction="horizontal" size={6}>
+              <div className="flex flex-wrap items-center gap-2">
+                <Switch
+                  className="bg-zinc-700 text-zinc-900 hover:text-black"
+                  checkedChildren="Ativos"
+                  unCheckedChildren="Todas"
+                  onChange={(ativo: boolean) => setFiltros((p) => ({ ...p, ativos: ativo ? true : null }))}
+                />
+
+                <Combobox
+                  placeholder="Produtos"
+                  items={tipoProdutoItems}
+                  onChange={(novoValor) => setFiltros((p) => ({ ...p, produto: p.produto === novoValor ? null : novoValor }))}
+                  className={clsx('h-7 rounded-full', filtros.produto ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900' : '')}
+                />
+
+                <ChipButton
+                  active={!!filtros.seloIndicacao}
+                  onClick={() => setFiltros((p) => ({ ...p, seloIndicacao: p.seloIndicacao ? null : true }))}
+                >
+                  Selo de indicação
+                </ChipButton>
+                <ChipButton
+                  active={!!filtros.tagRestricao}
+                  onClick={() => setFiltros((p) => ({ ...p, tagRestricao: p.tagRestricao ? null : true }))}
+                >
+                  Tag de restrição
+                </ChipButton>
+                <ChipButton
+                  active={!!filtros.diasVencimento}
+                  onClick={() => setFiltros((p) => ({ ...p, diasVencimento: p.diasVencimento ? null : true }))}
+                >
+                  30 dias de vencimento
+                </ChipButton>
+                <ChipButton
+                  active={!!filtros.vencidos}
+                  onClick={() => setFiltros((p) => ({ ...p, vencidos: p.vencidos ? null : true }))}
+                >
+                  Vencidos
+                </ChipButton>
+              </div>
+            </Space>
+          </div>
+
+          {/* Lista */}
+          <div className="mt-3 flex-1 overflow-y-auto text-[15px] font-medium scrollbar-thin scrollbar-track-slate-800 scrollbar-thumb-amarelo-1">
+            {loading ? (
+              <div className="flex h-full items-center justify-center text-sm text-zinc-500"><Loader2 className="mr-2 size-4 animate-spin" /> Carregando...</div>
+            ) : filteredEmpresas?.length > 0 ? (
+              <div className={clsx(loadingSpinMobile && 'max-md:blur-sm')}>
+                {filteredEmpresas.map((empresa, i) => (
+                  <div key={empresa.id} onClick={() => setSelectedEmpresa(empresa)}>
+                    <div
+                      className={clsx(
+                        'flex h-12 w-full items-center rounded-lg px-2 transition',
+                        'hover:bg-amber-100/60 hover:dark:text-black',
+                        empresa.id === selectedEmpresa.id ? 'bg-amber-200 dark:text-black' : i % 2 === 0 ? '' : 'bg-fundo-claro-3 dark:bg-fundo-dark-3 dark:text-black'
+                      )}
+                    >
+                      {/* Desktop row */}
+                      <span className={clsx('grid w-full grid-cols-[1fr_1fr_1fr] items-center p-2 max-md:hidden', empresa.dateDeleted && 'opacity-50 hover:opacity-100')}>
+                        <span className="truncate pr-2">
+                          {(empresa.dono?.idClienteClint ? `[${empresa.dono?.idClienteClint}] ` : '') + empresa.nome}
+                        </span>
+
+                        <div className="group relative flex w-full items-center gap-1 text-left">
+                          <div className="max-w-[300px] truncate text-zinc-600 dark:text-zinc-700">
+                            {empresa.produtos?.map((produto, index, array) => (
+                              <span key={`main-${empresa.id}-${index}`} className="whitespace-nowrap">
+                                {TipoProdutoLabel(produto.tipoProduto)}
+                                {index < array.length - 1 && ', '}
+                              </span>
+                            ))}
+                          </div>
+                          <div className="invisible absolute left-0 top-full z-50 mt-1 group-hover:visible">
+                            <span className="block whitespace-normal rounded bg-zinc-800 px-2 py-1 text-sm text-white">
+                              {empresa.produtos?.map((produto, index, array) => (
+                                <span key={`tooltip-${empresa.id}-${index}`} className="whitespace-nowrap">
+                                  {TipoProdutoLabel(produto.tipoProduto)}
+                                  {index < array.length - 1 && ', '}
+                                </span>
+                              ))}
+                            </span>
+                            <div className="absolute -top-1 left-1/2 size-2 -translate-x-1/2 rotate-45 bg-zinc-800" />
+                          </div>
+                        </div>
+
+                        <span className="group relative flex justify-center pl-2">
+                          {empresa.dateDeleted ? (
+                            <span className="text-zinc-600">
+                              Desativada: {format(new Date(empresa.dateDeleted), 'dd/MM/yyyy', { locale: ptBR })}
+                            </span>
+                          ) : (
+                            <div className="flex items-center gap-3">
+                              <span className="group/calendar inline-flex">
+                                <CalendarClock className={getCorCalendario(empresa.dataFim)} />
+                                <div className="invisible absolute left-1/2 top-full z-50 -translate-x-1/2 group-hover/calendar:visible">
+                                  <span className="block whitespace-nowrap rounded bg-zinc-800 px-2 py-1 text-sm text-white">
+                                    Vencimento: {format(new Date(empresa.dataFim), 'dd/MM/yyyy', { locale: ptBR })}
+                                  </span>
+                                  <div className="absolute -top-1 left-1/2 size-2 -translate-x-1/2 rotate-45 bg-zinc-800" />
+                                </div>
+                              </span>
+                              <div className="flex w-[50px] justify-between">
+                                {empresa.seloIndicacao && <BadgeCheck className="opacity-80" fill="currentColor" strokeWidth={1} />}
+                                {empresa.dono?.tagRestricao && <BadgeX className="opacity-80" fill="currentColor" strokeWidth={1} />}
+                              </div>
+                            </div>
+                          )}
+                        </span>
+                      </span>
+
+                      {/* Mobile row */}
+                      <span className="hidden h-12 w-full max-md:block">
+                        <Link href={`academias/${empresa.id}`} className={clsx('flex size-full items-center', empresa.dateDeleted && 'opacity-50 hover:opacity-100')}>
+                          <span className="flex flex-col items-start pl-2">
+                            {empresa.nome}
+                            {empresa.dateDeleted && (
+                              <span className="text-xs text-zinc-600">
+                                Desativada: {format(new Date(empresa.dateDeleted), 'dd/MM/yyyy', { locale: ptBR })}
+                              </span>
+                            )}
+                          </span>
+                        </Link>
+                      </span>
+                    </div>
+                    <Separator />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="py-10 text-center text-2xl font-semibold">Não foi encontrada nenhuma empresa.</p>
+            )}
+          </div>
+        </div>
+
+        {selectedEmpresa.id !== '' && (
+          <AcademiaPanel idEmpresa={selectedEmpresa.id} nome={selectedEmpresa.nome} nomeDono={selectedEmpresa.dono?.nome!} imagemLogo={selectedEmpresa.imagemLogo} />
+        )}
+      </div>
+    </div>
+  );
+}
