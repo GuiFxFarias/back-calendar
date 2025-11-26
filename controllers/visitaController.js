@@ -168,6 +168,7 @@ class VisitaController {
       data_visita = new Date(data_visita.getTime() + 3 * 60 * 60 * 1000);
 
       // detectar recorrência
+
       let recorrenciaPayload = null;
       if (req.body.recorrencia) {
         try {
@@ -223,18 +224,39 @@ class VisitaController {
       if (recorrenciaPayload) {
         const { freq, intervalo, dias_semana, fim_tipo, fim_data, fim_qtd } =
           recorrenciaPayload;
-        if (!freq)
+
+        if (!freq) {
           return res
             .status(400)
             .json({ erro: 'freq é obrigatório quando recorrencia é enviada.' });
+        }
+
+        // Validações específicas
+        if (freq === 'WEEKLY' && (!dias_semana || dias_semana.length === 0)) {
+          return res.status(400).json({
+            erro: 'dias_semana é obrigatório para recorrência semanal.',
+          });
+        }
+
+        if (fim_tipo === 'UNTIL' && !fim_data) {
+          return res.status(400).json({
+            erro: 'fim_data é obrigatório quando fim_tipo é UNTIL.',
+          });
+        }
+
+        if (fim_tipo === 'COUNT' && !fim_qtd) {
+          return res.status(400).json({
+            erro: 'fim_qtd é obrigatório quando fim_tipo é COUNT.',
+          });
+        }
 
         await visitaModel.criarRegraRecorrencia({
           visita_id,
           freq,
           intervalo: intervalo ?? 1,
-          dias_semana: dias_semana ?? null,
+          dias_semana: dias_semana || null,
           fim_tipo: fim_tipo ?? 'NEVER',
-          fim_data: fim_data ?? null,
+          fim_data: fim_data ? new Date(fim_data) : null,
           fim_qtd: fim_qtd ?? null,
           tenant_id: req.tenantId,
         });
