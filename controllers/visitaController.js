@@ -371,27 +371,50 @@ class VisitaController {
   }
 
   // DELETE /visita/:id
-  // DELETE /visita/:id?scope=single|all|future&data_instancia=...&from=...   (novo)
+  // DELETE /visita/:id?scope=single|all   (novo)
   async deletar(req, res) {
     try {
       const { id } = req.params;
-      const { scope } = req.query;
+      const { scope, data_instancia } = req.query;
 
-      // Se for série recorrente, validar scope
-      if (scope) {
-        if (scope === 'all') {
-          await visitaModel.deletar(id, req.tenantId);
-          return res.status(200).json({
-            mensagem: 'Série excluída com sucesso.',
+      // Deletar só uma ocorrência (criar exceção SKIP)
+      if (scope === 'single') {
+        if (!data_instancia) {
+          return res.status(400).json({
+            erro: 'data_instancia é obrigatória para scope=single',
           });
         }
 
-        return res.status(400).json({
-          erro: 'scope inválido. Use: all',
+        // Extrair ID real se for virtual
+        const idReal =
+          typeof id === 'string' && id.includes('-') ? id.split('-')[0] : id;
+
+        // CONVERTER para Date
+        const dataInstanciaDate = new Date(data_instancia);
+
+        await visitaModel.criarExcecaoSkip({
+          visita_id: idReal,
+          data_instancia: dataInstanciaDate,
+          tenant_id: req.tenantId,
+        });
+
+        return res.status(200).json({
+          mensagem: 'Ocorrência excluída com sucesso.',
         });
       }
 
-      // Deletar visita normal (sem recorrência)
+      // Deletar toda a série
+      if (scope === 'all') {
+        const idReal =
+          typeof id === 'string' && id.includes('-') ? id.split('-')[0] : id;
+
+        await visitaModel.deletar(idReal, req.tenantId);
+        return res.status(200).json({
+          mensagem: 'Série excluída com sucesso.',
+        });
+      }
+
+      // Deletar visita normal (sem scope)
       await visitaModel.deletar(id, req.tenantId);
       res.status(200).json({
         mensagem: 'Visita deletada com sucesso.',
