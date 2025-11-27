@@ -38,7 +38,13 @@ function toRRuleOptions(visitaPai, regra) {
   return opt;
 }
 
-function aplicarExcecoesEmOcorrencias(datas, visitaPai, excecoes) {
+function aplicarExcecoesEmOcorrencias(
+  datas,
+  visitaPai,
+  excecoes,
+  anexosPai,
+  regra
+) {
   const excluir = new Set(
     excecoes
       .filter((e) => e.tipo === 'SKIP')
@@ -49,21 +55,34 @@ function aplicarExcecoesEmOcorrencias(datas, visitaPai, excecoes) {
       .filter((e) => e.tipo === 'EDIT')
       .map((e) => [+new Date(e.data_instancia), e])
   );
-
   const ocorrencias = [];
+
   for (const dt of datas) {
     const key = +dt;
     if (excluir.has(key)) continue;
 
+    const dataStr = dt.toISOString().split('T')[0];
+
     let item = {
-      id_pai: visitaPai.id,
+      id: `${visitaPai.id}-${dataStr}`,
       cliente_id: visitaPai.cliente_id,
       data_visita: dt.toISOString(),
       preco: visitaPai.preco,
       descricao: visitaPai.descricao,
       status: visitaPai.status,
       tenant_id: visitaPai.tenant_id,
-      is_recorrente: 1,
+      is_recorrente: 0,
+      tags: visitaPai.tags || [],
+      anexos: anexosPai || [], // Anexos da visita pai
+      recorrencia: {
+        // Recorrência herdada
+        freq: regra.freq,
+        intervalo: regra.intervalo,
+        dias_semana: regra.dias_semana ? regra.dias_semana.split(',') : null,
+        fim_tipo: regra.fim_tipo,
+        fim_data: regra.fim_data,
+        fim_qtd: regra.fim_qtd,
+      },
     };
 
     if (edits.has(key)) {
@@ -76,13 +95,10 @@ function aplicarExcecoesEmOcorrencias(datas, visitaPai, excecoes) {
         preco: e.novo_preco ?? item.preco,
         descricao: e.nova_descricao ?? item.descricao,
         status: e.novo_status ?? item.status,
-        excecao: true,
       };
     }
-
     ocorrencias.push(item);
   }
-
   return ocorrencias;
 }
 
@@ -91,17 +107,51 @@ class VisitaController {
   async listarPorData(req, res) {
     try {
       const { inicio, fim } = req.query;
-
       if (!inicio || !fim) {
         return res
           .status(400)
           .json({ erro: 'Parâmetros "inicio" e "fim" são obrigatórios.' });
       }
 
-      // 1) visitas únicas do período (fluxo atual)
+      // 1) Buscar visitas únicas do período
       const unicas = await visitaModel.buscarPorData(inicio, fim, req.tenantId);
 
-      // 2) expandir séries recorrentes no período
+      // ✅ Para cada visita única, buscar anexos e recorrência
+      const unicasCompletas = await Promise.all(
+        unicas.map(async (v) => {
+          // Buscar anexos
+          const anexos = await anexoModel.buscarPorVisita(v.id, req.tenantId);
+
+          // Buscar regra de recorrência (se for recorrente)
+          let recorrencia = null;
+          if (v.is_recorrente === 1) {
+            const regra = await visitaModel.buscarRegraPorVisita(
+              req.tenantId,
+              v.id
+            );
+            if (regra) {
+              recorrencia = {
+                freq: regra.freq,
+                intervalo: regra.intervalo,
+                dias_semana: regra.dias_semana
+                  ? regra.dias_semana.split(',')
+                  : null,
+                fim_tipo: regra.fim_tipo,
+                fim_data: regra.fim_data,
+                fim_qtd: regra.fim_qtd,
+              };
+            }
+          }
+
+          return {
+            ...v,
+            anexos: anexos || [],
+            recorrencia,
+          };
+        })
+      );
+
+      // 2) Expandir séries recorrentes no período
       const series = await visitaModel.listarVisitasPaiComRegra?.(req.tenantId);
       let ocorrencias = [];
 
@@ -123,6 +173,12 @@ class VisitaController {
           const rule = new RRule(opt);
           const datas = rule.between(inicioDate, fimDate, true);
 
+          // Filtrar data da visita pai
+          const dataPai = new Date(s.data_visita);
+          const datasFiltradas = datas.filter((data) => {
+            return data.toDateString() !== dataPai.toDateString();
+          });
+
           const excecoes = await visitaModel.listarExcecoes(
             req.tenantId,
             s.id,
@@ -130,15 +186,27 @@ class VisitaController {
             fim
           );
 
-          const geradas = aplicarExcecoesEmOcorrencias(datas, s, excecoes);
+          // Buscar anexos da visita pai para herdar nas ocorrências
+          const anexosPai = await anexoModel.buscarPorVisita(
+            s.id,
+            req.tenantId
+          );
+
+          const geradas = aplicarExcecoesEmOcorrencias(
+            datasFiltradas,
+            s,
+            excecoes,
+            anexosPai, // Passar anexos
+            regra // Passar recorrência
+          );
+
           ocorrencias = ocorrencias.concat(geradas);
         }
       }
 
-      const resposta = [
-        ...unicas.map((v) => ({ ...v, is_recorrente: v.is_recorrente || 0 })), // preserva tags etc
-        ...ocorrencias,
-      ].sort((a, b) => new Date(a.data_visita) - new Date(b.data_visita));
+      const resposta = [...unicasCompletas, ...ocorrencias].sort(
+        (a, b) => new Date(a.data_visita) - new Date(b.data_visita)
+      );
 
       res.status(200).json(resposta);
     } catch (error) {
@@ -190,8 +258,6 @@ class VisitaController {
         { cliente_id, data_visita, preco, descricao, status, is_recorrente },
         req.tenantId
       );
-
-      console.log(resultado);
 
       const visita_id = resultado.insertId;
       let idAnexo = null;
@@ -262,16 +328,6 @@ class VisitaController {
         });
       }
 
-      // 4. (Opcional) Google Calendar – seu código original permanece comentado
-      // const cliente = await clienteModel.buscarPorId(cliente_id, req.tenantId);
-      // if (cliente[0]?.email) {
-      //   await agendarNoGoogle.criarEventoNoCalendar({
-      //     nomeCliente: cliente[0].nome,
-      //     emailCliente: cliente[0].email,
-      //     data_visita,
-      //   });
-      // }
-
       res
         .status(201)
         .json({ mensagem: 'Visita criada com sucesso!', visita_id });
@@ -314,62 +370,37 @@ class VisitaController {
     }
   }
 
-  // DELETE /visita/:id   (antigo)
+  // DELETE /visita/:id
   // DELETE /visita/:id?scope=single|all|future&data_instancia=...&from=...   (novo)
   async deletar(req, res) {
     try {
       const { id } = req.params;
-      const { scope, data_instancia, from } = req.query;
+      const { scope } = req.query;
 
-      // fluxo novo (recorrência) se houver scope
+      // Se for série recorrente, validar scope
       if (scope) {
-        if (scope === 'single') {
-          if (!data_instancia)
-            return res
-              .status(400)
-              .json({ erro: 'data_instancia é obrigatória para scope=single' });
-          await visitaModel.criarExcecaoSkip({
-            visita_id: id,
-            data_instancia,
-            tenant_id: req.tenantId,
-          });
-          return res
-            .status(200)
-            .json({ mensagem: 'Ocorrência da série pulada (exceção SKIP).' });
-        }
-
         if (scope === 'all') {
           await visitaModel.deletar(id, req.tenantId);
-          return res
-            .status(200)
-            .json({ mensagem: 'Série excluída com sucesso.' });
-        }
-
-        if (scope === 'future') {
-          if (!from)
-            return res
-              .status(400)
-              .json({ erro: 'from é obrigatório para scope=future' });
-          const ate = new Date(from);
-          ate.setSeconds(ate.getSeconds() - 1);
-          await visitaModel.atualizarRegraRecorrencia(req.tenantId, id, {
-            fim_tipo: 'UNTIL',
-            fim_data: ate.toISOString(),
+          return res.status(200).json({
+            mensagem: 'Série excluída com sucesso.',
           });
-          return res
-            .status(200)
-            .json({ mensagem: 'Ocorrências futuras encerradas na série.' });
         }
 
-        return res.status(400).json({ erro: 'scope inválido' });
+        return res.status(400).json({
+          erro: 'scope inválido. Use: all',
+        });
       }
 
-      // fluxo antigo (sem scope): apaga a visita única
+      // Deletar visita normal (sem recorrência)
       await visitaModel.deletar(id, req.tenantId);
-      res.status(200).json({ mensagem: 'Visita deletada com sucesso.' });
+      res.status(200).json({
+        mensagem: 'Visita deletada com sucesso.',
+      });
     } catch (error) {
       console.error('Erro ao deletar visita:', error);
-      res.status(500).json({ erro: 'Erro interno ao deletar visita.' });
+      res.status(500).json({
+        erro: 'Erro interno ao deletar visita.',
+      });
     }
   }
 
